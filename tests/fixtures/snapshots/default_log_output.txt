@@ -1,0 +1,50 @@
+@    nkywompl teernisse@visiostack.com 2025-07-24 15:57:54 b34b2705 conflict
+├─╮  (no description set)
+│ │ ○  yqtmtwnw teernisse@visiostack.com 2025-07-24 15:53:13 mega-merge c8d5508a
+│ │ │  (empty) (no description set)
+│ │ ○  zlszpnwy teernisse@visiostack.com 2025-07-24 15:53:13 48ebc8ac
+│ │ │  Resolve mega merge conflicts
+│ │ ×      knylytyq teernisse@visiostack.com 2025-07-24 15:53:13 4292a094 conflict
+╭───┼─┬─╮  Mega merge: hotfix + branch-a + branch-b + main
+│ │ ○ │ │  lqzokswu teernisse@visiostack.com 2025-07-24 15:48:00 hotfix fa7836de
+│ │ │ │ │  (empty) (no description set)
+│ │ ○ │ │  kklokvnn teernisse@visiostack.com 2025-07-24 15:48:00 c14b9f11
+│ │ │ │ │  Critical hotfix on feature-a
+│ │ │ │ │ ○  ltxyxmxz teernisse@visiostack.com 2025-07-24 15:53:13 b53ae6ea
+│ │ │ │ │ │  Resolve conflicts in complex merge
+│ │ │ │ │ ×  ztwtxurz teernisse@visiostack.com 2025-07-24 15:53:13 f5eaf039 conflict
+╭─────────┤  Complex merge: sub-branch-a + branch-b
+│ │ │ │ │ ○  kultlxsw teernisse@visiostack.com 2025-07-24 15:50:59 sub-branch-a fdbbf742
+│ ├───────╯  (empty) (no description set)
+│ ○ │ │ │  zntwuxmq teernisse@visiostack.com 2025-07-24 15:50:59 4fba250b
+│ ├───╯ │  Sub-branch from A: Additional development
+│ ○ │   │  uzyptwwp teernisse@visiostack.com 2025-07-24 15:50:59 branch-a 7de358ae
+│ │ │   │  (empty) (no description set)
+│ ○ │   │  nkwunnlw teernisse@visiostack.com 2025-07-24 15:50:59 a77991e3
+│ ├─────╯  Branch A: Conflicting change to shared file
+│ │ │ ○  zyopnzvu teernisse@visiostack.com 2025-07-24 15:53:13 aba123ad
+├─────╯  Sub-branch from B: Parallel development
+○ │ │  urtwztwy teernisse@visiostack.com 2025-07-24 15:53:13 branch-b git_head() eb3ba67a
+│ │ │  (empty) branch-b
+○ │ │  yznmkwxm teernisse@visiostack.com 2025-07-24 15:50:59 0a4ab934
+├─╯ │  Branch B: Another conflicting change
+│ ○ │  pxzpxtzt teernisse@visiostack.com 2025-07-24 15:50:59 f43fe929
+├─╯ │  Main branch modifies shared file
+│ ○ │  mqnplsou teernisse@visiostack.com 2025-07-24 15:50:59 a132980f
+├─╯ │  Add shared file for conflict testing
+◆   │  nrnuxzkz teernisse@visiostack.com 2025-07-24 15:50:59 main 6f77b4d9
+│   │  Prepare for v1.0.0 release
+~   │  (elided revisions)
+│ ○ │  xwzqxlul teernisse@visiostack.com 2025-07-24 15:50:59 7e6d419a
+├─╯ │  Late feature: Added after main development
+◆   │  umpqkunl teernisse@visiostack.com 2025-07-24 15:50:59 feature-b e01885d5
+│   │  (empty) feature-b
+~   │  (elided revisions)
+├───╯
+│ ○  pwnmquqv teernisse@visiostack.com 2025-07-24 15:42:24 408ceffc
+│ │  (empty) Empty commit for testing empty commit parsing
+│ ○  rulrulkn teernisse@visiostack.com 2025-07-24 15:42:09 d4e94379
+├─╯  Fix critical bug in feature A
+◆  wqpklvqz teernisse@visiostack.com 2025-07-24 15:41:33 feature-a d4af4bd0
+│  Start feature B development
+~

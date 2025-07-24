@@ -1,0 +1,6 @@
+<<<<<<< Conflict 1 of 1
+%%%%%%% Changes from base to side #1
++Shared file - BRANCH B VERSION
++++++++ Contents of side #2
+Shared file - BRANCH A VERSION
+>>>>>>> Conflict 1 of 1 ends

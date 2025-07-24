@@ -7,25 +7,25 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [ ] 1. Create test repository with complex jj graph states
-  - [ ] 1.1 Write tests for test repository creation and validation
-  - [ ] 1.2 Create jj repository with various graph patterns (merges, branches, linear history)
-  - [ ] 1.3 Add commits with different types (working copy, empty, hidden, bookmarks, tags)
-  - [ ] 1.4 Create snapshot files of expected jj log output for testing
-  - [ ] 1.5 Verify all test scenarios are covered and tests pass
+- [x] 1. Create test repository with complex jj graph states
+  - [x] 1.1 Write tests for test repository creation and validation
+  - [x] 1.2 Create jj repository with various graph patterns (merges, branches, linear history)
+  - [x] 1.3 Add commits with different types (working copy, empty, hidden, bookmarks, tags)
+  - [x] 1.4 Create snapshot files of expected jj log output for testing
+  - [x] 1.5 Verify all test scenarios are covered and tests pass
 
-- [ ] 2. Implement repository detection and validation
-  - [ ] 2.1 Write tests for .jj directory detection and jj command availability
-  - [ ] 2.2 Implement lua/jj/utils/repository.lua with detection functions
-  - [ ] 2.3 Add error message handling for non-jj directories
-  - [ ] 2.4 Verify all tests pass
+- [x] 2. Implement repository detection and validation
+  - [x] 2.1 Write tests for .jj directory detection and jj command availability
+  - [x] 2.2 Implement lua/jj/utils/repository.lua with detection functions
+  - [x] 2.3 Add error message handling for non-jj directories
+  - [x] 2.4 Verify all tests pass
 
-- [ ] 3. Implement jj command execution framework
-  - [ ] 3.1 Write tests for jj command execution with various templates and scenarios
-  - [ ] 3.2 Implement lua/jj/log/executor.lua with async command execution
-  - [ ] 3.3 Add comprehensive template definitions (minimal and comprehensive)
-  - [ ] 3.4 Add error handling for command execution failures
-  - [ ] 3.5 Verify all tests pass
+- [x] 3. Implement jj command execution framework
+  - [x] 3.1 Write tests for jj command execution with various templates and scenarios
+  - [x] 3.2 Implement lua/jj/log/executor.lua with async command execution
+  - [x] 3.3 Add comprehensive template definitions (minimal and comprehensive)
+  - [x] 3.4 Add error handling for command execution failures
+  - [x] 3.5 Verify all tests pass
 
 - [ ] 4. Implement dual-pass log parsing
   - [ ] 4.1 Write tests for parsing both minimal and comprehensive jj output using test repository

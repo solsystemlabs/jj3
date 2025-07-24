@@ -1,0 +1,50 @@
+[1m[38;5;9m@[0m    [1m[38;5;13mnky[38;5;8mwompl[39m [38;5;3mteernisse@visiostack.com[39m [38;5;14m2025-07-24 15:57:58[39m [38;5;12m0c[38;5;8ma3c603[39m [38;5;9mconflict[39m[0m
+├─╮  [1m[38;5;3m(no description set)[39m[0m
+│ │ ○  [1m[38;5;5myq[0m[38;5;8mtmtwnw[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:53:13[39m [38;5;5mmega-merge[39m [1m[38;5;4mc8[0m[38;5;8md5508a[39m
+│ │ │  [38;5;2m(empty)[39m [38;5;2m(no description set)[39m
+│ │ ○  [1m[38;5;5mzl[0m[38;5;8mszpnwy[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:53:13[39m [1m[38;5;4m48[0m[38;5;8mebc8ac[39m
+│ │ │  Resolve mega merge conflicts
+│ │ [1m[38;5;1m×[0m      [1m[38;5;5mkn[0m[38;5;8mylytyq[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:53:13[39m [1m[38;5;4m42[0m[38;5;8m92a094[39m [38;5;1mconflict[39m
+╭───┼─┬─╮  Mega merge: hotfix + branch-a + branch-b + main
+│ │ ○ │ │  [1m[38;5;5mlq[0m[38;5;8mzokswu[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:48:00[39m [38;5;5mhotfix[39m [1m[38;5;4mfa[0m[38;5;8m7836de[39m
+│ │ │ │ │  [38;5;2m(empty)[39m [38;5;2m(no description set)[39m
+│ │ ○ │ │  [1m[38;5;5mkk[0m[38;5;8mlokvnn[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:48:00[39m [1m[38;5;4mc1[0m[38;5;8m4b9f11[39m
+│ │ │ │ │  Critical hotfix on feature-a
+│ │ │ │ │ ○  [1m[38;5;5mlt[0m[38;5;8mxyxmxz[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:53:13[39m [1m[38;5;4mb[0m[38;5;8m53ae6ea[39m
+│ │ │ │ │ │  Resolve conflicts in complex merge
+│ │ │ │ │ [1m[38;5;1m×[0m  [1m[38;5;5mzt[0m[38;5;8mwtxurz[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:53:13[39m [1m[38;5;4mf5[0m[38;5;8meaf039[39m [38;5;1mconflict[39m
+╭─────────┤  Complex merge: sub-branch-a + branch-b
+│ │ │ │ │ ○  [1m[38;5;5mku[0m[38;5;8mltlxsw[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [38;5;5msub-branch-a[39m [1m[38;5;4mfd[0m[38;5;8mbbf742[39m
+│ ├───────╯  [38;5;2m(empty)[39m [38;5;2m(no description set)[39m
+│ ○ │ │ │  [1m[38;5;5mzn[0m[38;5;8mtwuxmq[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [1m[38;5;4m4f[0m[38;5;8mba250b[39m
+│ ├───╯ │  Sub-branch from A: Additional development
+│ ○ │   │  [1m[38;5;5muz[0m[38;5;8myptwwp[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [38;5;5mbranch-a[39m [1m[38;5;4m7d[0m[38;5;8me358ae[39m
+│ │ │   │  [38;5;2m(empty)[39m [38;5;2m(no description set)[39m
+│ ○ │   │  [1m[38;5;5mnkw[0m[38;5;8munnlw[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [1m[38;5;4ma7[0m[38;5;8m7991e3[39m
+│ ├─────╯  Branch A: Conflicting change to shared file
+│ │ │ ○  [1m[38;5;5mzy[0m[38;5;8mopnzvu[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:53:13[39m [1m[38;5;4mab[0m[38;5;8ma123ad[39m
+├─────╯  Sub-branch from B: Parallel development
+○ │ │  [1m[38;5;5mur[0m[38;5;8mtwztwy[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:53:13[39m [38;5;5mbranch-b[39m [38;5;2mgit_head()[39m [1m[38;5;4meb[0m[38;5;8m3ba67a[39m
+│ │ │  [38;5;2m(empty)[39m branch-b
+○ │ │  [1m[38;5;5myz[0m[38;5;8mnmkwxm[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [1m[38;5;4m0a[0m[38;5;8m4ab934[39m
+├─╯ │  Branch B: Another conflicting change
+│ ○ │  [1m[38;5;5mpx[0m[38;5;8mzpxtzt[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [1m[38;5;4mf4[0m[38;5;8m3fe929[39m
+├─╯ │  Main branch modifies shared file
+│ ○ │  [1m[38;5;5mm[0m[38;5;8mqnplsou[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [1m[38;5;4ma1[0m[38;5;8m32980f[39m
+├─╯ │  Add shared file for conflict testing
+[1m[38;5;14m◆[0m   │  [1m[38;5;5mnr[0m[38;5;8mnuxzkz[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [38;5;5mmain[39m [1m[38;5;4m6[0m[38;5;8mf77b4d9[39m
+│   │  Prepare for v1.0.0 release
+[38;5;8m~[39m   │  [38;5;8m(elided revisions)[39m
+│ ○ │  [1m[38;5;5mx[0m[38;5;8mwzqxlul[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [1m[38;5;4m7e[0m[38;5;8m6d419a[39m
+├─╯ │  Late feature: Added after main development
+[1m[38;5;14m◆[0m   │  [1m[38;5;5mum[0m[38;5;8mpqkunl[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:50:59[39m [38;5;5mfeature-b[39m [1m[38;5;4me0[0m[38;5;8m1885d5[39m
+│   │  [38;5;2m(empty)[39m feature-b
+[38;5;8m~[39m   │  [38;5;8m(elided revisions)[39m
+├───╯
+│ ○  [1m[38;5;5mpw[0m[38;5;8mnmquqv[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:42:24[39m [1m[38;5;4m40[0m[38;5;8m8ceffc[39m
+│ │  [38;5;2m(empty)[39m Empty commit for testing empty commit parsing
+│ ○  [1m[38;5;5mr[0m[38;5;8mulrulkn[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:42:09[39m [1m[38;5;4md4e[0m[38;5;8m94379[39m
+├─╯  Fix critical bug in feature A
+[1m[38;5;14m◆[0m  [1m[38;5;5mw[0m[38;5;8mqpklvqz[39m [38;5;3mteernisse@visiostack.com[39m [38;5;6m2025-07-24 15:41:33[39m [38;5;5mfeature-a[39m [1m[38;5;4md4a[0m[38;5;8mf4bd0[39m
+│  Start feature B development
+~

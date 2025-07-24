@@ -1,5 +1,6 @@
 -- Mock vim APIs for testing
 local M = {}
+local lfs = require('lfs')
 
 -- Mock vim global
 _G.vim = {
@@ -12,6 +13,73 @@ _G.vim = {
     set = function(mode, lhs, rhs, opts)
       -- Mock implementation
     end,
+  },
+  fn = {
+    getcwd = function()
+      return lfs.currentdir()
+    end,
+    isdirectory = function(path)
+      local attr = lfs.attributes(path)
+      return (attr and attr.mode == "directory") and 1 or 0
+    end,
+    fnamemodify = function(path, modifier)
+      if modifier == ":h" then
+        -- Return parent directory
+        return path:match("^(.+)/[^/]*$") or path
+      end
+      return path
+    end,
+    system = function(cmd)
+      local handle = io.popen(cmd .. "; echo $?")
+      local full_result = handle:read("*all")
+      handle:close()
+      
+      -- Extract exit code from last line
+      local lines = {}
+      for line in full_result:gmatch("[^\n]*") do
+        if line ~= "" then
+          table.insert(lines, line)
+        end
+      end
+      
+      local exit_code = tonumber(lines[#lines]) or 0
+      vim.v.shell_error = exit_code
+      
+      -- Return everything except the exit code
+      table.remove(lines, #lines)
+      return table.concat(lines, "\n")
+    end,
+    jobstart = function(cmd, opts)
+      -- Mock async job execution
+      local output = vim.fn.system(cmd)
+      local exit_code = vim.v.shell_error
+      
+      -- Simulate async behavior
+      if opts and opts.on_exit then
+        opts.on_exit(nil, exit_code)
+      end
+      
+      return 1 -- Mock job ID
+    end,
+    shellescape = function(str)
+      -- Simple shell escaping for testing
+      return "'" .. str:gsub("'", "'\"'\"'") .. "'"
+    end,
+  },
+  v = {
+    shell_error = 0,
+  },
+  wait = function(ms)
+    -- Mock implementation - just sleep briefly
+    local start = os.clock()
+    while os.clock() - start < (ms / 1000) do
+      -- busy wait
+    end
+  end,
+  loop = {
+    now = function()
+      return os.clock() * 1000 -- return milliseconds
+    end
   },
   deepcopy = function(tbl)
     -- Simple deep copy implementation for testing
@@ -36,6 +104,12 @@ _G.vim = {
       end
     end
     return result
+  end,
+  list_extend = function(list, items)
+    for _, item in ipairs(items) do
+      table.insert(list, item)
+    end
+    return list
   end,
 }
 
