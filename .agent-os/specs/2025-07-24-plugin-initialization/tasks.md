@@ -13,11 +13,11 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.3 Create lua/jj/ directory structure with init.lua, config.lua, commands.lua
   - [x] 1.4 Verify all tests pass
 
-- [ ] 2. Implement core plugin initialization
-  - [ ] 2.1 Write tests for plugin initialization and module setup
-  - [ ] 2.2 Implement lua/jj/init.lua with main setup function
-  - [ ] 2.3 Implement lua/jj/config.lua with default configuration
-  - [ ] 2.4 Verify all tests pass
+- [x] 2. Implement core plugin initialization
+  - [x] 2.1 Write tests for plugin initialization and module setup
+  - [x] 2.2 Implement lua/jj/init.lua with main setup function
+  - [x] 2.3 Implement lua/jj/config.lua with default configuration
+  - [x] 2.4 Verify all tests pass
 
 - [ ] 3. Add user command registration
   - [ ] 3.1 Write tests for :JJ command registration and basic functionality

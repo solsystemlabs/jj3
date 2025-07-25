@@ -7,6 +7,12 @@ _G.vim = {
   api = {
     nvim_create_user_command = function(name, fn, opts)
       -- Mock implementation
+      vim.user_commands = vim.user_commands or {}
+      vim.user_commands[name] = {fn = fn, opts = opts}
+    end,
+    nvim_create_autocmd = function(event, opts)
+      -- Mock autocmd creation
+      return 1 -- Mock autocmd ID
     end,
     nvim_set_hl = function(ns_id, name, val)
       -- Mock highlight group creation
@@ -139,6 +145,18 @@ _G.vim = {
     if not str then return "" end
     return str:match("^%s*(.-)%s*$")
   end,
+  notify = function(message, level)
+    -- Mock notification
+  end,
+  log = {
+    levels = {
+      ERROR = 1,
+      WARN = 2,  
+      INFO = 3,
+      DEBUG = 4
+    }
+  },
+  user_commands = {},
 }
 
 return M
