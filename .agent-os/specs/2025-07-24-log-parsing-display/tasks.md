@@ -48,12 +48,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 6.4 Implement ANSI color preservation and application to buffer
   - [x] 6.5 Verify all tests pass
 
-- [ ] 7. Implement window and buffer management
-  - [ ] 7.1 Write tests for buffer creation, reuse, and modifiable state management
-  - [ ] 7.2 Implement lua/jj/ui/window.lua with split window management
-  - [ ] 7.3 Add buffer lifecycle management (create, update, make non-modifiable)
-  - [ ] 7.4 Add configurable window positioning and sizing
-  - [ ] 7.5 Verify all tests pass
+- [x] 7. Implement window and buffer management
+  - [x] 7.1 Write tests for buffer creation, reuse, and modifiable state management
+  - [x] 7.2 Implement lua/jj/ui/window.lua with split window management
+  - [x] 7.3 Add buffer lifecycle management (create, update, make non-modifiable)
+  - [x] 7.4 Add configurable window positioning and sizing
+  - [x] 7.5 Verify all tests pass
 
 - [ ] 8. Integrate log orchestration and connect to commands
   - [ ] 8.1 Write tests for complete log display workflow using test repository
