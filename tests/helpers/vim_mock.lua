@@ -111,6 +111,10 @@ _G.vim = {
     end
     return list
   end,
+  trim = function(str)
+    if not str then return "" end
+    return str:match("^%s*(.-)%s*$")
+  end,
 }
 
 return M

@@ -27,13 +27,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.4 Add error handling for command execution failures
   - [x] 3.5 Verify all tests pass
 
-- [ ] 4. Implement dual-pass log parsing
-  - [ ] 4.1 Write tests for parsing both minimal and comprehensive jj output using test repository
-  - [ ] 4.2 Implement lua/jj/log/parser.lua with commit ID extraction and graph parsing
-  - [ ] 4.3 Add comprehensive commit information parsing with null-byte field separation
-  - [ ] 4.4 Implement commit object creation and data structure population
-  - [ ] 4.5 Add commit-to-graph position mapping logic
-  - [ ] 4.6 Verify all tests pass against test repository snapshots
+- [x] 4. Implement dual-pass log parsing
+  - [x] 4.1 Write tests for parsing both minimal and comprehensive jj output using test repository
+  - [x] 4.2 Implement lua/jj/log/parser.lua with commit ID extraction and graph parsing
+  - [x] 4.3 Add comprehensive commit information parsing with null-byte field separation
+  - [x] 4.4 Implement commit object creation and data structure population
+  - [x] 4.5 Add commit-to-graph position mapping logic
+  - [x] 4.6 Verify all tests pass against test repository snapshots
 
 - [ ] 5. Implement ANSI color processing
   - [ ] 5.1 Write tests for ANSI escape sequence parsing and Neovim highlight mapping
