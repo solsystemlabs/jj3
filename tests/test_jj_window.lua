@@ -504,6 +504,67 @@ describe("JJ Window Management", function()
       assert.is_true(applied_config.width > 0)
       assert.is_true(applied_config.height > 0)
     end)
+
+    it("should support new technical spec configuration format", function()
+      local spec_config = {
+        type = "float",
+        width = 100,
+        height = 30,
+        row = 10,
+        col = 15,
+        border = "rounded",
+        title = "jj3",
+        title_pos = "center"
+      }
+      
+      window.configure(spec_config)
+      local applied_config = window.get_configuration()
+      
+      -- Should map type="float" to style="floating" 
+      assert.equals("floating", applied_config.style)
+      assert.equals(100, applied_config.width)
+      assert.equals(30, applied_config.height)
+      assert.equals(10, applied_config.row)
+      assert.equals(15, applied_config.col)
+      assert.equals("rounded", applied_config.border)
+    end)
+
+    it("should support vsplit and hsplit configuration types", function()
+      -- Test vsplit (vertical split)
+      local vsplit_config = { type = "vsplit", width = 60 }
+      window.configure(vsplit_config)
+      local applied_config = window.get_configuration()
+      
+      assert.equals("split", applied_config.style)
+      assert.equals("right", applied_config.position) -- default vertical position
+      assert.equals(60, applied_config.width)
+      
+      -- Test hsplit (horizontal split)
+      local hsplit_config = { type = "hsplit", height = 25 }
+      window.configure(hsplit_config)
+      applied_config = window.get_configuration()
+      
+      assert.equals("split", applied_config.style)
+      assert.equals("bottom", applied_config.position) -- default horizontal position
+      assert.equals(25, applied_config.height)
+    end)
+
+    it("should maintain backwards compatibility with existing config format", function()
+      local legacy_config = {
+        style = "floating",
+        position = "left",
+        width = 80,
+        height = 20
+      }
+      
+      window.configure(legacy_config)
+      local applied_config = window.get_configuration()
+      
+      assert.equals("floating", applied_config.style)
+      assert.equals("left", applied_config.position)
+      assert.equals(80, applied_config.width)
+      assert.equals(20, applied_config.height)
+    end)
   end)
 
   describe("integration with renderer", function()

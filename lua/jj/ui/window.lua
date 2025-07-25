@@ -16,6 +16,8 @@ local DEFAULT_CONFIG = {
   border = "single",   -- border style for floating windows
   focusable = true,    -- whether window is focusable
   zindex = 50,         -- z-index for floating windows
+  title = "jj3",       -- window title
+  title_pos = "center", -- title position
 }
 
 -- Current configuration
@@ -87,6 +89,8 @@ local function calculate_window_config(config)
       style = "minimal",
       focusable = config.focusable,
       zindex = config.zindex,
+      title = config.title,
+      title_pos = config.title_pos,
     }
   else
     -- Split window - configuration handled by vim commands
@@ -279,7 +283,20 @@ function M.configure(user_config)
     end
   end
   
-  -- Validate style
+  -- Handle new technical spec format (type field)
+  if user_config.type then
+    if user_config.type == "float" then
+      config.style = "floating"
+    elseif user_config.type == "vsplit" then
+      config.style = "split"
+      config.position = "right" -- vertical split position
+    elseif user_config.type == "hsplit" then
+      config.style = "split"
+      config.position = "bottom" -- horizontal split position
+    end
+  end
+  
+  -- Validate style (backwards compatibility)
   if user_config.style then
     local valid_styles = {split = true, floating = true}
     if valid_styles[user_config.style] then
@@ -322,6 +339,15 @@ function M.configure(user_config)
   
   if user_config.zindex and type(user_config.zindex) == "number" then
     config.zindex = user_config.zindex
+  end
+  
+  -- Handle technical spec additional fields
+  if user_config.title then
+    config.title = user_config.title
+  end
+  
+  if user_config.title_pos then
+    config.title_pos = user_config.title_pos
   end
   
   current_config = config
