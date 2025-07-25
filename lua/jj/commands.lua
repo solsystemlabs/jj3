@@ -1,14 +1,28 @@
 -- Command registration and handling for jj.nvim
 local M = {}
 
--- Import the log orchestration module
-local log = require("jj.log.init")
+-- Lazy load modules for better startup performance
+local log = nil
+local config = nil
 
--- Import config module
-local config = require("jj.config")
+-- Helper function to ensure modules are loaded
+local function ensure_modules_loaded()
+  if not log then
+    log = require("jj.log.init")
+    -- Set up log orchestration on first load
+    if config then
+      local user_config = config.get()
+      log.setup(user_config.window)
+    end
+  end
+  if not config then
+    config = require("jj.config")
+  end
+end
 
 -- Command handlers
 local function handle_jj_command(opts)
+  ensure_modules_loaded()
   local args = opts.args or ""
   
   if args == "" then
@@ -66,11 +80,13 @@ end
 
 -- Keybinding handler for log toggle
 local function handle_log_toggle()
+  ensure_modules_loaded()
   log.toggle_log()
 end
 
 -- Setup window-specific keymaps for log buffer
 local function setup_log_buffer_keymaps(buffer_id)
+  ensure_modules_loaded()
   local opts = { buffer = buffer_id, silent = true, noremap = true }
   
   -- Close window
@@ -105,6 +121,7 @@ end
 
 -- Configure log display based on user settings
 local function apply_user_configuration()
+  ensure_modules_loaded()
   local user_config = config.get()
   
   if user_config.window then
@@ -114,6 +131,11 @@ end
 
 -- Setup commands and keybindings
 function M.setup()
+  -- Ensure config is loaded for setup
+  if not config then
+    config = require("jj.config")
+  end
+  
   -- Apply user configuration
   apply_user_configuration()
   
@@ -144,8 +166,8 @@ function M.setup()
   -- Set up buffer-specific keymaps
   setup_log_buffer_autocmd()
   
-  -- Set up log orchestration
-  log.setup(user_config.window)
+  -- Set up log orchestration (defer until first use)
+  -- log.setup(user_config.window) -- This will be called in ensure_modules_loaded
 end
 
 -- Cleanup function

@@ -19,20 +19,20 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.3 Implement lua/jj/config.lua with default configuration
   - [x] 2.4 Verify all tests pass
 
-- [ ] 3. Add user command registration
-  - [ ] 3.1 Write tests for :JJ command registration and basic functionality
-  - [ ] 3.2 Implement lua/jj/commands.lua with command registration
-  - [ ] 3.3 Register :JJ command with placeholder functionality
-  - [ ] 3.4 Verify all tests pass
+- [x] 3. Add user command registration
+  - [x] 3.1 Write tests for :JJ command registration and basic functionality
+  - [x] 3.2 Implement lua/jj/commands.lua with command registration
+  - [x] 3.3 Register :JJ command with placeholder functionality
+  - [x] 3.4 Verify all tests pass
 
-- [ ] 4. Add global keybinding setup
-  - [ ] 4.1 Write tests for <leader>jl keybinding registration and functionality
-  - [ ] 4.2 Implement keybinding registration in commands.lua
-  - [ ] 4.3 Connect <leader>jl to log window toggle placeholder
-  - [ ] 4.4 Verify all tests pass
+- [x] 4. Add global keybinding setup
+  - [x] 4.1 Write tests for <leader>jl keybinding registration and functionality
+  - [x] 4.2 Implement keybinding registration in commands.lua
+  - [x] 4.3 Connect <leader>jl to log window toggle placeholder
+  - [x] 4.4 Verify all tests pass
 
-- [ ] 5. Configure lazy loading support
-  - [ ] 5.1 Write tests for lazy.nvim compatibility and event triggers
-  - [ ] 5.2 Configure plugin for lazy loading with appropriate events/commands
-  - [ ] 5.3 Test plugin loading through different plugin managers
-  - [ ] 5.4 Verify all tests pass
+- [x] 5. Configure lazy loading support
+  - [x] 5.1 Write tests for lazy.nvim compatibility and event triggers
+  - [x] 5.2 Configure plugin for lazy loading with appropriate events/commands
+  - [x] 5.3 Test plugin loading through different plugin managers
+  - [x] 5.4 Verify all tests pass
