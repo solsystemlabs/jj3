@@ -35,11 +35,11 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 4.5 Add commit-to-graph position mapping logic
   - [x] 4.6 Verify all tests pass against test repository snapshots
 
-- [ ] 5. Implement ANSI color processing
-  - [ ] 5.1 Write tests for ANSI escape sequence parsing and Neovim highlight mapping
-  - [ ] 5.2 Implement lua/jj/utils/ansi.lua with color code processing
-  - [ ] 5.3 Add Neovim highlight group creation and management
-  - [ ] 5.4 Verify all tests pass
+- [x] 5. Implement ANSI color processing
+  - [x] 5.1 Write tests for ANSI escape sequence parsing and Neovim highlight mapping
+  - [x] 5.2 Implement lua/jj/utils/ansi.lua with color code processing
+  - [x] 5.3 Add Neovim highlight group creation and management
+  - [x] 5.4 Verify all tests pass
 
 - [ ] 6. Implement buffer rendering engine
   - [ ] 6.1 Write tests for buffer content generation and ANSI color application

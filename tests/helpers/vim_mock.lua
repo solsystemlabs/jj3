@@ -8,6 +8,30 @@ _G.vim = {
     nvim_create_user_command = function(name, fn, opts)
       -- Mock implementation
     end,
+    nvim_set_hl = function(ns_id, name, val)
+      -- Mock highlight group creation
+    end,
+    nvim_create_namespace = function(name)
+      -- Mock namespace creation
+      return 1 -- Return mock namespace ID
+    end,
+    nvim_buf_clear_namespace = function(buffer, ns_id, start, end_line)
+      -- Mock clearing namespace highlights
+    end,
+    nvim_buf_add_highlight = function(buffer, ns_id, hl_group, line, col_start, col_end)
+      -- Mock adding highlight
+    end,
+    nvim_get_hl_by_name = function(name, rgb)
+      -- Mock highlight group retrieval
+      local mock_highlights = {
+        Normal = {foreground = 0xFFFFFF, background = 0x000000},
+        Comment = {foreground = 0x808080},
+        String = {foreground = 0x00FF00},
+        Number = {foreground = 0x0000FF},
+        Function = {foreground = 0xFF00FF}
+      }
+      return mock_highlights[name] or {}
+    end,
   },
   keymap = {
     set = function(mode, lhs, rhs, opts)
