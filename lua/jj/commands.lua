@@ -1,210 +1,197 @@
 -- Command registration and handling for jj.nvim
 local M = {}
 
--- Import required modules
-local repository = require("jj.utils.repository")
-local executor = require("jj.log.executor")
-local parser = require("jj.log.parser")
-local ansi = require("jj.utils.ansi")
+-- Import the log orchestration module
+local log = require("jj.log.init")
 
--- State for log window
-local log_window = {
-	buffer = nil,
-	window = nil,
-	is_open = false
-}
+-- Import config module
+local config = require("jj.config")
 
--- Create and display jj log in a new buffer
-local function show_jj_log()
-	-- Validate repository first
-	local validation = repository.validate_repository()
-	if not validation.valid then
-		vim.notify("jj.nvim: " .. (validation.error or "Not in a jj repository"), vim.log.levels.ERROR)
-		return
-	end
-
-	vim.notify("jj.nvim: Loading jj log...", vim.log.levels.INFO)
-
-	-- Get colored log output
-	local log_result = executor.execute_jj_command("log --color=always")
-	if not log_result.success then
-		vim.notify("jj.nvim: Failed to get log: " .. (log_result.error or "unknown error"), vim.log.levels.ERROR)
-		return
-	end
-
-	-- Process the colored output
-	local lines = {}
-	for line in log_result.output:gmatch("[^\n]+") do
-		table.insert(lines, line)
-	end
-
-	-- Set up ANSI color processing and force highlight group creation
-	ansi.setup()
-	local processed = ansi.process_colored_lines_for_buffer(lines)
-	
-	-- Debug: Check if we have ANSI codes and highlights
-	local has_ansi = false
-	for _, line in ipairs(lines) do
-		if line:find("\027%[") then
-			has_ansi = true
-			break
-		end
-	end
-	
-	-- Force recreate highlight groups to ensure they're available
-	ansi.create_highlight_groups()
-	
-	vim.notify(string.format("jj.nvim: Debug - Has ANSI codes: %s, Highlights: %d", 
-		tostring(has_ansi), #processed.highlights), vim.log.levels.INFO)
-
-	-- Create new buffer
-	local buf = vim.api.nvim_create_buf(false, true)
-	
-	-- Set buffer options for proper rendering
-	vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
-	vim.api.nvim_buf_set_option(buf, 'swapfile', false)
-	vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
-	vim.api.nvim_buf_set_option(buf, 'filetype', 'jj')
-	vim.api.nvim_buf_set_name(buf, 'jj://log')
-	-- Ensure syntax highlighting is enabled
-	vim.api.nvim_buf_set_option(buf, 'syntax', 'on')
-
-	-- Set buffer content first (clean lines without ANSI codes)
-	vim.api.nvim_buf_set_lines(buf, 0, -1, false, processed.lines)
-
-	-- Apply highlights with detailed debugging
-	if #processed.highlights > 0 then
-		-- Debug: Show first few highlights
-		local debug_highlights = {}
-		for i = 1, math.min(3, #processed.highlights) do
-			local hl = processed.highlights[i]
-			table.insert(debug_highlights, string.format("Line %d, Col %d-%d: %s", 
-				hl.line, hl.col_start, hl.col_end, hl.group))
-		end
-		vim.notify("jj.nvim: Debug highlights: " .. table.concat(debug_highlights, "; "), vim.log.levels.INFO)
-		
-		local highlight_result = ansi.apply_highlights_to_buffer(buf, processed.highlights)
-		if not highlight_result.success then
-			vim.notify("jj.nvim: Warning - some highlights failed to apply: " .. 
-				table.concat(highlight_result.errors or {}, ", "), vim.log.levels.WARN)
-		else
-			vim.notify(string.format("jj.nvim: Applied %d highlights successfully", #processed.highlights), vim.log.levels.INFO)
-		end
-	else
-		vim.notify("jj.nvim: No highlights to apply", vim.log.levels.INFO)
-	end
-	
-	-- Make buffer non-modifiable after highlights are applied
-	vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-
-	-- Create window to display the buffer
-	local win_config = {
-		relative = 'editor',
-		width = math.floor(vim.o.columns * 0.8),
-		height = math.floor(vim.o.lines * 0.8),
-		col = math.floor(vim.o.columns * 0.1),
-		row = math.floor(vim.o.lines * 0.1),
-		style = 'minimal',
-		border = 'rounded',
-		title = ' JJ Log ',
-		title_pos = 'center'
-	}
-
-	local win = vim.api.nvim_open_win(buf, true, win_config)
-	
-	-- Set window options
-	vim.api.nvim_win_set_option(win, 'wrap', false)
-	vim.api.nvim_win_set_option(win, 'cursorline', true)
-
-	-- Store window and buffer info
-	log_window.buffer = buf
-	log_window.window = win
-	log_window.is_open = true
-
-	-- Set up keymaps for the log window
-	local opts = { buffer = buf, silent = true }
-	vim.keymap.set('n', 'q', function() M.close_log_window() end, opts)
-	vim.keymap.set('n', '<Esc>', function() M.close_log_window() end, opts)
-	vim.keymap.set('n', 'r', function() M.refresh_log() end, opts)
-
-	vim.notify("jj.nvim: Log loaded (" .. #processed.lines .. " commits)", vim.log.levels.INFO)
+-- Command handlers
+local function handle_jj_command(opts)
+  local args = opts.args or ""
+  
+  if args == "" then
+    -- Default behavior: toggle log window
+    log.toggle_log()
+  elseif args == "show" then
+    -- Explicitly show log
+    log.show_log()
+  elseif args == "close" then
+    -- Close log window
+    log.close_log()
+  elseif args == "refresh" then
+    -- Refresh log content
+    log.refresh_log()
+  elseif args == "toggle" then
+    -- Toggle log window
+    log.toggle_log()
+  elseif args == "focus" then
+    -- Focus log window
+    log.focus_log()
+  elseif args == "clear" then
+    -- Clear log content
+    log.clear_log()
+  elseif args == "status" then
+    -- Show status information
+    local status = log.get_status()
+    local status_msg = string.format(
+      "Log window: %s, Has data: %s, Window ID: %s, Buffer ID: %s",
+      status.is_open and "open" or "closed",
+      status.has_data and "yes" or "no",
+      status.window_id or "none",
+      status.buffer_id or "none"
+    )
+    vim.notify("jj.nvim status: " .. status_msg, vim.log.levels.INFO)
+  elseif args:match("^%-%-") then
+    -- Handle jj command options (e.g., :JJ --limit 10)
+    log.show_log_with_options(args)
+  else
+    -- Show help for unknown commands
+    local help_msg = [[
+jj.nvim commands:
+  :JJ              - Toggle log window
+  :JJ show         - Show log window
+  :JJ close        - Close log window  
+  :JJ refresh      - Refresh log content
+  :JJ toggle       - Toggle log window
+  :JJ focus        - Focus log window
+  :JJ clear        - Clear log content
+  :JJ status       - Show status information
+  :JJ --<options>  - Show log with custom jj options
+    ]]
+    vim.notify(help_msg, vim.log.levels.INFO)
+  end
 end
 
--- Close the log window
-function M.close_log_window()
-	if log_window.is_open and log_window.window then
-		vim.api.nvim_win_close(log_window.window, true)
-		log_window.window = nil
-		log_window.buffer = nil
-		log_window.is_open = false
-	end
+-- Keybinding handler for log toggle
+local function handle_log_toggle()
+  log.toggle_log()
 end
 
--- Refresh the log window
-function M.refresh_log()
-	if log_window.is_open then
-		M.close_log_window()
-		show_jj_log()
-	end
+-- Setup window-specific keymaps for log buffer
+local function setup_log_buffer_keymaps(buffer_id)
+  local opts = { buffer = buffer_id, silent = true, noremap = true }
+  
+  -- Close window
+  vim.keymap.set('n', 'q', function() log.close_log() end, opts)
+  vim.keymap.set('n', '<Esc>', function() log.close_log() end, opts)
+  
+  -- Refresh log
+  vim.keymap.set('n', 'r', function() log.refresh_log() end, opts)
+  vim.keymap.set('n', 'R', function() log.refresh_log() end, opts)
+  
+  -- Focus window
+  vim.keymap.set('n', '<CR>', function() log.focus_log() end, opts)
+  
+  -- Clear content (for testing/debugging)
+  vim.keymap.set('n', 'c', function() log.clear_log() end, opts)
+  
+  -- Toggle window
+  vim.keymap.set('n', 't', function() log.toggle_log() end, opts)
 end
 
--- Toggle log window (main functionality)
-local function toggle_log_window()
-	if log_window.is_open then
-		M.close_log_window()
-	else
-		show_jj_log()
-	end
+-- Auto-command to set up keymaps when log buffer is entered
+local function setup_log_buffer_autocmd()
+  vim.api.nvim_create_autocmd("BufEnter", {
+    pattern = "JJ Log",
+    callback = function()
+      local buffer_id = vim.api.nvim_get_current_buf()
+      setup_log_buffer_keymaps(buffer_id)
+    end,
+    desc = "Set up jj log buffer keymaps"
+  })
 end
 
--- Test dual-pass parsing (for testing/debugging)
-local function test_dual_pass_parsing()
-	local validation = repository.validate_repository()
-	if not validation.valid then
-		vim.notify("jj.nvim: " .. (validation.error or "Not in a jj repository"), vim.log.levels.ERROR)
-		return
-	end
-
-	vim.notify("jj.nvim: Testing dual-pass parsing...", vim.log.levels.INFO)
-
-	local result = parser.parse_jj_log_dual_pass()
-	if result.success then
-		vim.notify(string.format("jj.nvim: Dual-pass parsing successful - %d commits, %d graph lines", 
-			#result.commits, #result.graph_lines), vim.log.levels.INFO)
-		
-		-- Print first few commits for debugging
-		for i = 1, math.min(3, #result.commits) do
-			local commit = result.commits[i]
-			print(string.format("Commit %d: %s (%s) - %s", 
-				i, commit.commit_id:sub(1, 8), commit.author_name, commit.description))
-		end
-	else
-		vim.notify("jj.nvim: Dual-pass parsing failed: " .. (result.error or "unknown error"), vim.log.levels.ERROR)
-	end
+-- Configure log display based on user settings
+local function apply_user_configuration()
+  local user_config = config.get()
+  
+  if user_config.window then
+    log.configure(user_config.window)
+  end
 end
 
 -- Setup commands and keybindings
 function M.setup()
-	-- Register :JJ user command
-	vim.api.nvim_create_user_command("JJ", function(opts)
-		if opts.args == "test" then
-			test_dual_pass_parsing()
-		else
-			toggle_log_window()
-		end
-	end, {
-		desc = "Main jj.nvim command",
-		nargs = '?',
-	})
+  -- Apply user configuration
+  apply_user_configuration()
+  
+  -- Register :JJ user command with completion
+  vim.api.nvim_create_user_command("JJ", handle_jj_command, {
+    desc = "jj.nvim: Display and manage jj log",
+    nargs = '?',
+    complete = function()
+      return {
+        "show", "close", "refresh", "toggle", 
+        "focus", "clear", "status", "--limit", "--revisions"
+      }
+    end,
+  })
+  
+  -- Register global keybinding for log toggle
+  local user_config = config.get()
+  local keymap = user_config.keymaps.toggle_log
+  
+  if keymap then
+    vim.keymap.set("n", keymap, handle_log_toggle, {
+      desc = "Toggle jj log window",
+      silent = true,
+      noremap = true,
+    })
+  end
+  
+  -- Set up buffer-specific keymaps
+  setup_log_buffer_autocmd()
+  
+  -- Set up log orchestration
+  log.setup(user_config.window)
+end
 
-	-- Register global keybinding for log toggle
-	local config = require("jj.config")
-	local keymap = config.get().keymaps.toggle_log
+-- Cleanup function
+function M.cleanup()
+  log.cleanup()
+end
 
-	vim.keymap.set("n", keymap, toggle_log_window, {
-		desc = "Toggle jj log window",
-		silent = true,
-	})
+-- Expose log functions for advanced usage
+M.log = {
+  show = function(config) return log.show_log(config) end,
+  toggle = function(config) return log.toggle_log(config) end,
+  close = function() return log.close_log() end,
+  refresh = function() return log.refresh_log() end,
+  focus = function() return log.focus_log() end,
+  clear = function() return log.clear_log() end,
+  is_open = function() return log.is_log_open() end,
+  configure = function(config) return log.configure(config) end,
+  get_status = function() return log.get_status() end,
+  get_configuration = function() return log.get_configuration() end,
+  show_with_options = function(options, config) return log.show_log_with_options(options, config) end,
+}
+
+-- Legacy compatibility functions (if needed)
+function M.close_log_window()
+  return log.close_log()
+end
+
+function M.refresh_log()
+  return log.refresh_log()
+end
+
+-- Test function for debugging
+function M.test_integration()
+  local status = log.get_status()
+  print("jj.nvim Integration Test:")
+  print("  Log window open:", status.is_open)
+  print("  Has log data:", status.has_data)
+  print("  Window ID:", status.window_id)
+  print("  Buffer ID:", status.buffer_id)
+  print("  Configuration:", vim.inspect(status.configuration))
+  
+  if not status.is_open then
+    print("  Opening log window...")
+    local success = log.show_log()
+    print("  Show log result:", success)
+  end
 end
 
 return M

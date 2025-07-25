@@ -4,6 +4,9 @@ local M = {}
 -- Path to the complex test repository
 M.test_repo_path = "tests/fixtures/complex-repo"
 
+-- Path to non-jj directory for testing
+M.non_jj_dir_path = "tests/fixtures/non-jj-dir"
+
 -- Path to snapshot files
 M.snapshots_path = "tests/fixtures/snapshots"
 
@@ -73,6 +76,11 @@ function M.get_expected_commit_count()
     count = count + 1
   end
   return count
+end
+
+-- Get path to non-jj directory for testing error cases
+function M.get_non_jj_dir()
+  return M.non_jj_dir_path
 end
 
 -- Get list of bookmarks in test repository
