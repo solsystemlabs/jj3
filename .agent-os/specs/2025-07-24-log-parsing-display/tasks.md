@@ -55,9 +55,9 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 7.4 Add configurable window positioning and sizing
   - [x] 7.5 Verify all tests pass
 
-- [ ] 8. Integrate log orchestration and connect to commands
-  - [ ] 8.1 Write tests for complete log display workflow using test repository
-  - [ ] 8.2 Implement lua/jj/log/init.lua with full orchestration logic
-  - [ ] 8.3 Connect log display to existing :JJ command and <leader>jl keybinding
-  - [ ] 8.4 Add repository detection integration with appropriate error messages
-  - [ ] 8.5 Verify all tests pass and manual testing shows expected log display
+- [x] 8. Integrate log orchestration and connect to commands
+  - [x] 8.1 Write tests for complete log display workflow using test repository
+  - [x] 8.2 Implement lua/jj/log/init.lua with full orchestration logic
+  - [x] 8.3 Connect log display to existing :JJ command and <leader>jl keybinding
+  - [x] 8.4 Add repository detection integration with appropriate error messages
+  - [x] 8.5 Verify all tests pass and manual testing shows expected log display

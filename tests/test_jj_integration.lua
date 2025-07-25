@@ -222,24 +222,9 @@ describe("JJ Log Integration", function()
     end)
 
     it("should handle repository detection errors gracefully", function()
-      -- Change to non-jj directory and mock system to reflect this
-      local original_system = vim.fn.system
-      local original_isdirectory = vim.fn.isdirectory
-      
-      -- Mock being in non-jj directory
-      vim.fn.isdirectory = function(path)
-        if path:match("%.jj$") then
-          return 0 -- No .jj directory found
-        end
-        return original_isdirectory(path)
-      end
-      
-      vim.fn.system = function(cmd)
-        if cmd:match("jj.*log") then
-          return "error: not in jj repository"
-        end
-        return original_system(cmd)
-      end
+      -- Change to non-jj directory to test detection
+      local original_cwd = lfs.currentdir()
+      lfs.chdir(test_repo.get_non_jj_dir())
       
       local success = log_integration.show_log()
       
@@ -251,9 +236,8 @@ describe("JJ Log Integration", function()
       assert.equals(vim.log.levels.ERROR, error_notification.level)
       assert.matches("jj repository", error_notification.message)
       
-      -- Restore original functions
-      vim.fn.system = original_system
-      vim.fn.isdirectory = original_isdirectory
+      -- Restore original directory  
+      lfs.chdir(original_cwd)
     end)
 
     it("should provide user feedback during loading", function()
@@ -349,15 +333,14 @@ describe("JJ Log Integration", function()
     it("should handle missing jj command gracefully", function()
       -- Mock jj command not found
       local original_system = vim.fn.system
-      local original_shell_error = vim.v.shell_error
       
       vim.fn.system = function(cmd)
         if cmd:match("command %-v jj") then
+          vim.v.shell_error = 127 -- Command not found
           return ""
         end
         return original_system(cmd)
       end
-      vim.v.shell_error = 127 -- Command not found
       
       local success = log_integration.show_log()
       assert.is_false(success)
@@ -372,9 +355,8 @@ describe("JJ Log Integration", function()
       end
       assert.is_true(jj_error_found)
       
-      -- Restore original functions
+      -- Restore original function
       vim.fn.system = original_system
-      vim.v.shell_error = original_shell_error
     end)
 
     it("should handle corrupted repository gracefully", function()
@@ -386,14 +368,9 @@ describe("JJ Log Integration", function()
     end)
 
     it("should provide helpful error messages", function()
-      -- Mock non-jj repository case
-      local original_isdirectory = vim.fn.isdirectory
-      vim.fn.isdirectory = function(path)
-        if path:match("%.jj$") then
-          return 0 -- No .jj directory found
-        end
-        return original_isdirectory(path)
-      end
+      -- Test error message in non-jj directory
+      local original_cwd = lfs.currentdir()
+      lfs.chdir(test_repo.get_non_jj_dir())
       
       log_integration.show_log()
       
@@ -403,36 +380,37 @@ describe("JJ Log Integration", function()
       assert.is_not_nil(error_msg.message)
       assert.is_true(#error_msg.message > 10) -- Should be descriptive
       
-      -- Restore original function
-      vim.fn.isdirectory = original_isdirectory
+      -- Restore original directory
+      lfs.chdir(original_cwd)
     end)
   end)
 
   describe("integration with existing components", function()
     it("should use repository detection module", function()
+      -- Ensure we're in test repository
+      lfs.chdir(test_repo.test_repo_path)
+      
       -- Test that repository validation is called
       local success = log_integration.show_log()
       
       -- In valid repo, should succeed
       assert.is_true(success)
       
-      -- Test invalid repo case with mocking
-      local original_isdirectory = vim.fn.isdirectory
-      vim.fn.isdirectory = function(path)
-        if path:match("%.jj$") then
-          return 0 -- No .jj directory found
-        end
-        return original_isdirectory(path)
-      end
+      -- Test invalid repo case by changing directory
+      local original_cwd = lfs.currentdir()
+      lfs.chdir(test_repo.get_non_jj_dir())
       
       local failure = log_integration.show_log()
       assert.is_false(failure)
       
-      -- Restore original function
-      vim.fn.isdirectory = original_isdirectory
+      -- Restore original directory
+      lfs.chdir(original_cwd)
     end)
 
     it("should use executor module for jj commands", function()
+      -- Ensure we're in test repository
+      lfs.chdir(test_repo.test_repo_path)
+      
       local success = log_integration.show_log()
       assert.is_true(success)
       
@@ -444,6 +422,9 @@ describe("JJ Log Integration", function()
     end)
 
     it("should use parser module for log processing", function()
+      -- Ensure we're in test repository
+      lfs.chdir(test_repo.test_repo_path)
+      
       local success = log_integration.show_log()
       assert.is_true(success)
       
@@ -453,6 +434,9 @@ describe("JJ Log Integration", function()
     end)
 
     it("should use renderer module for buffer display", function()
+      -- Ensure we're in test repository
+      lfs.chdir(test_repo.test_repo_path)
+      
       local success = log_integration.show_log()
       assert.is_true(success)
       
@@ -464,6 +448,9 @@ describe("JJ Log Integration", function()
     end)
 
     it("should use window module for display management", function()
+      -- Ensure we're in test repository
+      lfs.chdir(test_repo.test_repo_path)
+      
       local success = log_integration.show_log()
       assert.is_true(success)
       
@@ -480,6 +467,9 @@ describe("JJ Log Integration", function()
 
   describe("command integration", function()
     it("should provide show_log function for :JJ command", function()
+      -- Ensure we're in test repository
+      lfs.chdir(test_repo.test_repo_path)
+      
       assert.is_function(log_integration.show_log)
       
       local success = log_integration.show_log()
@@ -487,6 +477,9 @@ describe("JJ Log Integration", function()
     end)
 
     it("should provide toggle_log function for keybinding", function()
+      -- Ensure we're in test repository
+      lfs.chdir(test_repo.test_repo_path)
+      
       assert.is_function(log_integration.toggle_log)
       
       local result = log_integration.toggle_log()
@@ -494,6 +487,9 @@ describe("JJ Log Integration", function()
     end)
 
     it("should provide refresh_log function", function()
+      -- Ensure we're in test repository
+      lfs.chdir(test_repo.test_repo_path)
+      
       assert.is_function(log_integration.refresh_log)
       
       -- First show log

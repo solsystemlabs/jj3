@@ -4,8 +4,8 @@ local M = {}
 -- Path to the complex test repository
 M.test_repo_path = "tests/fixtures/complex-repo"
 
--- Path to non-jj directory for testing
-M.non_jj_dir_path = "tests/fixtures/non-jj-dir"
+-- Path to non-jj directory for testing (outside this repository)
+M.non_jj_dir_path = "/tmp/non-jj-test-dir"
 
 -- Path to snapshot files
 M.snapshots_path = "tests/fixtures/snapshots"
