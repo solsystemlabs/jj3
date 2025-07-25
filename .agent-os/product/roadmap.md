@@ -11,8 +11,8 @@
 
 ### Must-Have Features
 
-- [ ] Plugin initialization and setup - Basic plugin structure with proper Neovim integration `M`
-- [ ] jj log parsing and display - Parse `jj log --graph` output and display in buffer `L`
+- [x] Plugin initialization and setup - Basic plugin structure with proper Neovim integration `M`
+- [x] jj log parsing and display - Parse `jj log --graph` output and display in buffer `L`
 - [ ] Basic window management - Create and manage floating/split window for log display `M`
 - [ ] Buffer navigation - Vim-style movement (j/k, gg/G) within log buffer `S`
 - [ ] Auto-refresh on filesystem changes - Detect repo changes and update display `M`
