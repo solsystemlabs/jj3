@@ -41,12 +41,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 5.3 Add Neovim highlight group creation and management
   - [x] 5.4 Verify all tests pass
 
-- [ ] 6. Implement buffer rendering engine
-  - [ ] 6.1 Write tests for buffer content generation and ANSI color application
-  - [ ] 6.2 Implement lua/jj/log/renderer.lua with display line generation
-  - [ ] 6.3 Add graph character and commit info combination logic
-  - [ ] 6.4 Implement ANSI color preservation and application to buffer
-  - [ ] 6.5 Verify all tests pass
+- [x] 6. Implement buffer rendering engine
+  - [x] 6.1 Write tests for buffer content generation and ANSI color application
+  - [x] 6.2 Implement lua/jj/log/renderer.lua with display line generation
+  - [x] 6.3 Add graph character and commit info combination logic
+  - [x] 6.4 Implement ANSI color preservation and application to buffer
+  - [x] 6.5 Verify all tests pass
 
 - [ ] 7. Implement window and buffer management
   - [ ] 7.1 Write tests for buffer creation, reuse, and modifiable state management

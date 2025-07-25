@@ -361,6 +361,46 @@ function M.strip_ansi_codes(text)
   return text:gsub("\027%[[%d;]*m", "")
 end
 
+-- Apply ANSI highlights to a single line in a buffer
+function M.apply_ansi_highlights_to_line(buffer_id, ns_id, line_idx, line_text)
+  if not buffer_id or not line_text or line_text == "" then
+    return
+  end
+  
+  local segments = M.parse_ansi_text(line_text)
+  local col_offset = 0
+  
+  for _, segment in ipairs(segments) do
+    local text = segment.text
+    local start_col = col_offset
+    local end_col = col_offset + #text
+    
+    -- Add highlight if segment has ANSI code
+    if segment.ansi_code then
+      local highlight_group = M.ansi_to_highlight_group(segment.ansi_code)
+      
+      -- Apply highlight to buffer
+      local ok, err = pcall(function()
+        vim.api.nvim_buf_add_highlight(
+          buffer_id,
+          ns_id,
+          highlight_group,
+          line_idx,
+          start_col,
+          end_col
+        )
+      end)
+      
+      if not ok then
+        -- Silently handle highlight errors to avoid breaking rendering
+        -- Could log this in debug mode if needed
+      end
+    end
+    
+    col_offset = end_col
+  end
+end
+
 -- Initialize ANSI color processing
 function M.setup()
   -- Create default highlight groups
