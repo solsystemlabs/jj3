@@ -38,33 +38,64 @@ local function show_jj_log()
 		table.insert(lines, line)
 	end
 
-	-- Set up ANSI color processing
+	-- Set up ANSI color processing and force highlight group creation
 	ansi.setup()
 	local processed = ansi.process_colored_lines_for_buffer(lines)
+	
+	-- Debug: Check if we have ANSI codes and highlights
+	local has_ansi = false
+	for _, line in ipairs(lines) do
+		if line:find("\027%[") then
+			has_ansi = true
+			break
+		end
+	end
+	
+	-- Force recreate highlight groups to ensure they're available
+	ansi.create_highlight_groups()
+	
+	vim.notify(string.format("jj.nvim: Debug - Has ANSI codes: %s, Highlights: %d", 
+		tostring(has_ansi), #processed.highlights), vim.log.levels.INFO)
 
 	-- Create new buffer
 	local buf = vim.api.nvim_create_buf(false, true)
 	
-	-- Set buffer options
+	-- Set buffer options for proper rendering
 	vim.api.nvim_buf_set_option(buf, 'buftype', 'nofile')
 	vim.api.nvim_buf_set_option(buf, 'swapfile', false)
 	vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
 	vim.api.nvim_buf_set_option(buf, 'filetype', 'jj')
 	vim.api.nvim_buf_set_name(buf, 'jj://log')
+	-- Ensure syntax highlighting is enabled
+	vim.api.nvim_buf_set_option(buf, 'syntax', 'on')
 
-	-- Set buffer content (clean lines without ANSI codes)
+	-- Set buffer content first (clean lines without ANSI codes)
 	vim.api.nvim_buf_set_lines(buf, 0, -1, false, processed.lines)
-	
-	-- Make buffer non-modifiable
-	vim.api.nvim_buf_set_option(buf, 'modifiable', false)
 
-	-- Apply highlights
+	-- Apply highlights with detailed debugging
 	if #processed.highlights > 0 then
+		-- Debug: Show first few highlights
+		local debug_highlights = {}
+		for i = 1, math.min(3, #processed.highlights) do
+			local hl = processed.highlights[i]
+			table.insert(debug_highlights, string.format("Line %d, Col %d-%d: %s", 
+				hl.line, hl.col_start, hl.col_end, hl.group))
+		end
+		vim.notify("jj.nvim: Debug highlights: " .. table.concat(debug_highlights, "; "), vim.log.levels.INFO)
+		
 		local highlight_result = ansi.apply_highlights_to_buffer(buf, processed.highlights)
 		if not highlight_result.success then
-			vim.notify("jj.nvim: Warning - some highlights failed to apply", vim.log.levels.WARN)
+			vim.notify("jj.nvim: Warning - some highlights failed to apply: " .. 
+				table.concat(highlight_result.errors or {}, ", "), vim.log.levels.WARN)
+		else
+			vim.notify(string.format("jj.nvim: Applied %d highlights successfully", #processed.highlights), vim.log.levels.INFO)
 		end
+	else
+		vim.notify("jj.nvim: No highlights to apply", vim.log.levels.INFO)
 	end
+	
+	-- Make buffer non-modifiable after highlights are applied
+	vim.api.nvim_buf_set_option(buf, 'modifiable', false)
 
 	-- Create window to display the buffer
 	local win_config = {

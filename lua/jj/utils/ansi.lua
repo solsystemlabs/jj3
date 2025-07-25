@@ -1,24 +1,24 @@
 -- ANSI color processing utilities for jj.nvim
 local M = {}
 
--- Default ANSI color mappings to Neovim colors
+-- Default ANSI color mappings to Neovim colors (more terminal-like colors)
 local DEFAULT_COLOR_MAPPINGS = {
-  ["30"] = {fg = "#000000"}, -- Black
-  ["31"] = {fg = "#FF0000"}, -- Red  
-  ["32"] = {fg = "#00FF00"}, -- Green
-  ["33"] = {fg = "#FFFF00"}, -- Yellow
-  ["34"] = {fg = "#0000FF"}, -- Blue
-  ["35"] = {fg = "#FF00FF"}, -- Magenta
-  ["36"] = {fg = "#00FFFF"}, -- Cyan
-  ["37"] = {fg = "#FFFFFF"}, -- White
-  ["90"] = {fg = "#808080"}, -- Bright Black (Gray)
-  ["91"] = {fg = "#FF8080"}, -- Bright Red
-  ["92"] = {fg = "#80FF80"}, -- Bright Green
-  ["93"] = {fg = "#FFFF80"}, -- Bright Yellow
-  ["94"] = {fg = "#8080FF"}, -- Bright Blue
-  ["95"] = {fg = "#FF80FF"}, -- Bright Magenta
-  ["96"] = {fg = "#80FFFF"}, -- Bright Cyan
-  ["97"] = {fg = "#FFFFFF"}, -- Bright White
+  ["30"] = {fg = "#282828"}, -- Black
+  ["31"] = {fg = "#cc241d"}, -- Red  
+  ["32"] = {fg = "#98971a"}, -- Green
+  ["33"] = {fg = "#d79921"}, -- Yellow
+  ["34"] = {fg = "#458588"}, -- Blue
+  ["35"] = {fg = "#b16286"}, -- Magenta
+  ["36"] = {fg = "#689d6a"}, -- Cyan
+  ["37"] = {fg = "#a89984"}, -- White
+  ["90"] = {fg = "#928374"}, -- Bright Black (Gray)
+  ["91"] = {fg = "#fb4934"}, -- Bright Red
+  ["92"] = {fg = "#b8bb26"}, -- Bright Green
+  ["93"] = {fg = "#fabd2f"}, -- Bright Yellow
+  ["94"] = {fg = "#83a598"}, -- Bright Blue
+  ["95"] = {fg = "#d3869b"}, -- Bright Magenta
+  ["96"] = {fg = "#8ec07c"}, -- Bright Cyan
+  ["97"] = {fg = "#ebdbb2"}, -- Bright White
   ["1"] = {style = "bold"},
   ["4"] = {style = "underline"},
   ["0"] = {}, -- Reset
@@ -105,7 +105,10 @@ function M.ansi_to_highlight_group(ansi_code)
   local group_name = "JJ"
   local has_style = false
   
-  for _, code in ipairs(color_codes) do
+  local i = 1
+  while i <= #color_codes do
+    local code = color_codes[i]
+    
     if code == "1" then
       group_name = group_name .. "Bold"
       has_style = true
@@ -126,12 +129,20 @@ function M.ansi_to_highlight_group(ansi_code)
         ["94"] = "BrightBlue", ["95"] = "BrightMagenta", ["96"] = "BrightCyan", ["97"] = "BrightWhite"
       }
       group_name = group_name .. (bright_color_names[code] or "BrightColor" .. code)
-    elseif code == "38" then
-      -- 256-color or RGB color (simplified)
-      group_name = group_name .. "Extended"
+    elseif code == "38" and i < #color_codes then
+      -- 256-color mode: 38;5;N
+      if color_codes[i + 1] == "5" and i + 2 <= #color_codes then
+        local color_num = color_codes[i + 2]
+        group_name = group_name .. "ExtendedColor5Color" .. color_num
+        i = i + 2 -- Skip the next two codes (5 and color number)
+      else
+        group_name = group_name .. "Extended"
+      end
     else
       group_name = group_name .. "Color" .. code
     end
+    
+    i = i + 1
   end
   
   -- Default if no specific style/color found
@@ -174,10 +185,51 @@ function M.create_highlight_groups()
       definition = hl_def
     })
     
-    -- Actually create the highlight group in Neovim
+    -- Force create the highlight group in Neovim with default namespace 0
+    -- Always create the group even if empty (will use default foreground)
     if next(hl_def) then
       vim.api.nvim_set_hl(0, group_name, hl_def)
+    else
+      -- For reset codes or empty definitions, ensure group exists
+      vim.api.nvim_set_hl(0, group_name, {})
     end
+  end
+  
+  -- Also create some common combination groups that jj might use
+  local combination_groups = {
+    {name = "JJRedBold", def = {fg = "#fb4934", bold = true}},
+    {name = "JJGreenBold", def = {fg = "#b8bb26", bold = true}},
+    {name = "JJYellowBold", def = {fg = "#fabd2f", bold = true}},
+    {name = "JJBlueBold", def = {fg = "#83a598", bold = true}},
+    {name = "JJMagentaBold", def = {fg = "#d3869b", bold = true}},
+    {name = "JJCyanBold", def = {fg = "#8ec07c", bold = true}},
+    {name = "JJDefault", def = {}},
+    -- Extended color mappings for 256-color palette (basic colors 0-15)
+    {name = "JJExtendedColor5Color0", def = {fg = "#000000"}}, -- Black
+    {name = "JJExtendedColor5Color1", def = {fg = "#cc241d"}}, -- Red
+    {name = "JJExtendedColor5Color2", def = {fg = "#98971a"}}, -- Green
+    {name = "JJExtendedColor5Color3", def = {fg = "#d79921"}}, -- Yellow
+    {name = "JJExtendedColor5Color4", def = {fg = "#458588"}}, -- Blue
+    {name = "JJExtendedColor5Color5", def = {fg = "#b16286"}}, -- Magenta
+    {name = "JJExtendedColor5Color6", def = {fg = "#689d6a"}}, -- Cyan
+    {name = "JJExtendedColor5Color7", def = {fg = "#a89984"}}, -- White
+    {name = "JJExtendedColor5Color8", def = {fg = "#928374"}}, -- Bright Black
+    {name = "JJExtendedColor5Color9", def = {fg = "#fb4934"}}, -- Bright Red
+    {name = "JJExtendedColor5Color10", def = {fg = "#b8bb26"}}, -- Bright Green
+    {name = "JJExtendedColor5Color11", def = {fg = "#fabd2f"}}, -- Bright Yellow
+    {name = "JJExtendedColor5Color12", def = {fg = "#83a598"}}, -- Bright Blue
+    {name = "JJExtendedColor5Color13", def = {fg = "#d3869b"}}, -- Bright Magenta
+    {name = "JJExtendedColor5Color14", def = {fg = "#8ec07c"}}, -- Bright Cyan
+    {name = "JJExtendedColor5Color15", def = {fg = "#ebdbb2"}}, -- Bright White
+    -- Some common 256-color palette colors that jj might use
+    {name = "JJExtendedColor5Color240", def = {fg = "#585858"}}, -- Dark gray
+    {name = "JJExtendedColor5Color244", def = {fg = "#808080"}}, -- Medium gray
+    {name = "JJExtendedColor5Color250", def = {fg = "#bcbcbc"}}, -- Light gray
+  }
+  
+  for _, group in ipairs(combination_groups) do
+    vim.api.nvim_set_hl(0, group.name, group.def)
+    table.insert(groups, {name = group.name, definition = group.def})
   end
   
   return groups
