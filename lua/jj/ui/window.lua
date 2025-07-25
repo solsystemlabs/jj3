@@ -25,6 +25,11 @@ local current_config = vim.deepcopy(DEFAULT_CONFIG)
 local log_buffer_id = nil
 local log_window_id = nil
 
+-- Setup buffer with proper options including text wrapping (alias for create_log_buffer)
+function M.setup_buffer()
+  return M.create_log_buffer()
+end
+
 -- Create a new jj log buffer
 function M.create_log_buffer()
   -- Create unlisted scratch buffer
@@ -95,8 +100,16 @@ local function calculate_window_config(config)
   return win_config
 end
 
+-- Create floating window with specified configuration
+function M.create_float_window(buffer_id, config)
+  local merged_config = vim.deepcopy(config or {})
+  merged_config.style = "floating"
+  local win_config = calculate_window_config(merged_config)
+  return vim.api.nvim_open_win(buffer_id, config and config.focusable or true, win_config)
+end
+
 -- Create split window based on position
-local function create_split_window(buffer_id, config)
+function M.create_split_window(buffer_id, config)
   local cmd
   
   if config.position == "left" then
@@ -124,6 +137,11 @@ local function create_split_window(buffer_id, config)
   return window_id
 end
 
+-- Create window with specified configuration (main entry point)
+function M.create_window(config)
+  return M.open_log_window(config)
+end
+
 -- Open log window with specified configuration
 function M.open_log_window(config)
   -- Merge user config with current config
@@ -149,7 +167,7 @@ function M.open_log_window(config)
     window_id = vim.api.nvim_open_win(buffer_id, config.focusable, win_config)
   else
     -- Create split window
-    window_id = create_split_window(buffer_id, config)
+    window_id = M.create_split_window(buffer_id, config)
   end
   
   if not window_id then
@@ -158,7 +176,7 @@ function M.open_log_window(config)
   
   -- Set window options
   local window_options = {
-    wrap = false,
+    wrap = true,          -- Enable text wrapping for long lines
     spell = false,
     number = false,
     relativenumber = false,
@@ -178,6 +196,11 @@ function M.open_log_window(config)
   return window_id
 end
 
+-- Close window (alias for close_log_window)
+function M.close_window()
+  return M.close_log_window()
+end
+
 -- Close log window
 function M.close_log_window()
   if log_window_id and vim.api.nvim_win_is_valid(log_window_id) then
@@ -186,6 +209,11 @@ function M.close_log_window()
     return true
   end
   return false
+end
+
+-- Toggle window (alias for toggle_log_window)
+function M.toggle_window()
+  return M.toggle_log_window()
 end
 
 -- Toggle log window (open if closed, close if open)
@@ -206,6 +234,11 @@ function M.focus_log_window()
     return true
   end
   return false
+end
+
+-- Check if window is open (alias for is_log_window_open)
+function M.is_window_open()
+  return M.is_log_window_open()
 end
 
 -- Check if log window is currently open

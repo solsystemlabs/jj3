@@ -180,7 +180,7 @@ vim.api.nvim_win_set_option = function(window_id, option, value)
 end
 
 -- Load the window module from the plugin directory
-local window = dofile("lua/jj/ui/window.lua")
+local window = dofile("../lua/jj/ui/window.lua")
 
 describe("JJ Window Management", function()
   local lfs = require('lfs')
@@ -306,9 +306,57 @@ describe("JJ Window Management", function()
       
       -- Should have set window options
       assert.is_not_nil(mock_window_options[window_id])
-      assert.is_false(mock_window_options[window_id].wrap)
+      assert.is_true(mock_window_options[window_id].wrap)  -- Text wrapping should be enabled
       assert.is_false(mock_window_options[window_id].spell)
       assert.equals("jj", mock_window_options[window_id].filetype)
+    end)
+
+    it("should enable text wrapping for long lines", function()
+      local window_id = window.open_log_window()
+      
+      -- Verify text wrapping is specifically enabled
+      assert.is_not_nil(mock_window_options[window_id])
+      assert.is_true(mock_window_options[window_id].wrap)
+      
+      -- This ensures long log lines will wrap instead of being truncated
+      -- when the window is too narrow to display the full content
+    end)
+
+    it("should create window using create_window function", function()
+      local window_id = window.create_window()
+      
+      assert.is_not_nil(window_id)
+      assert.is_number(window_id)
+      assert.is_true(vim.api.nvim_win_is_valid(window_id))
+    end)
+
+    it("should create floating window directly", function()
+      local buffer_id = window.setup_buffer()
+      local config = {
+        width = 80,
+        height = 20,
+        row = 5,
+        col = 10,
+        border = "rounded"
+      }
+      
+      local window_id = window.create_float_window(buffer_id, config)
+      
+      assert.is_not_nil(window_id)
+      assert.is_true(vim.api.nvim_win_is_valid(window_id))
+    end)
+
+    it("should create split window directly", function()
+      local buffer_id = window.setup_buffer()
+      local config = {
+        position = "right",
+        width = 60
+      }
+      
+      local window_id = window.create_split_window(buffer_id, config)
+      
+      assert.is_not_nil(window_id)
+      assert.is_true(vim.api.nvim_win_is_valid(window_id))
     end)
 
     it("should support floating window configuration", function()
@@ -381,6 +429,28 @@ describe("JJ Window Management", function()
       local closed = window.close_log_window()
       assert.is_true(closed)
       assert.is_false(window.is_log_window_open())
+    end)
+
+    it("should work with alias functions", function()
+      -- Test is_window_open alias
+      assert.is_false(window.is_window_open())
+      
+      -- Test create_window alias
+      local window_id = window.create_window()
+      assert.is_not_nil(window_id)
+      assert.is_true(window.is_window_open())
+      
+      -- Test toggle_window alias
+      local closed = window.toggle_window()
+      assert.is_false(closed)
+      assert.is_false(window.is_window_open())
+      
+      -- Test close_window alias  
+      window.create_window()
+      assert.is_true(window.is_window_open())
+      local closed2 = window.close_window()
+      assert.is_true(closed2)
+      assert.is_false(window.is_window_open())
     end)
   end)
 

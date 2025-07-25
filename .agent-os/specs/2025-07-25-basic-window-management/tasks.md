@@ -7,13 +7,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [ ] 1. Implement core window management functions
-  - [ ] 1.1 Write tests for window creation and buffer setup functions
-  - [ ] 1.2 Create `create_window()` function with type delegation logic
-  - [ ] 1.3 Implement `create_float_window()` with floating window configuration
-  - [ ] 1.4 Implement `create_split_window()` for vertical and horizontal splits
-  - [ ] 1.5 Create `setup_buffer()` with proper options including text wrapping
-  - [ ] 1.6 Verify all window creation tests pass
+- [x] 1. Implement core window management functions
+  - [x] 1.1 Write tests for window creation and buffer setup functions
+  - [x] 1.2 Create `create_window()` function with type delegation logic
+  - [x] 1.3 Implement `create_float_window()` with floating window configuration
+  - [x] 1.4 Implement `create_split_window()` for vertical and horizontal splits
+  - [x] 1.5 Create `setup_buffer()` with proper options including text wrapping
+  - [x] 1.6 Verify all window creation tests pass
 
 - [ ] 2. Implement window lifecycle management
   - [ ] 2.1 Write tests for window state management functions
