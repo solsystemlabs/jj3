@@ -39,13 +39,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 4.5 Add confirmation prompts for destructive operations (abandon, squash)
   - [x] 4.6 Verify all default command tests pass
 
-- [ ] 5. Build user customization framework
-  - [ ] 5.1 Write tests for configuration loading and user command/menu definitions
-  - [ ] 5.2 Extend configuration system to support user-defined commands and menus
-  - [ ] 5.3 Implement user command/menu validation and conflict resolution
-  - [ ] 5.4 Add configuration merging system for user and default definitions
-  - [ ] 5.5 Create examples and documentation for user customization
-  - [ ] 5.6 Verify all customization framework tests pass
+- [x] 5. Build user customization framework
+  - [x] 5.1 Write tests for configuration loading and user command/menu definitions
+  - [x] 5.2 Extend configuration system to support user-defined commands and menus
+  - [x] 5.3 Implement user command/menu validation and conflict resolution
+  - [x] 5.4 Add configuration merging system for user and default definitions
+  - [x] 5.5 Create examples and documentation for user customization
+  - [x] 5.6 Verify all customization framework tests pass
 
 - [ ] 6. Integrate with existing plugin architecture
   - [ ] 6.1 Write integration tests for command system with log display and navigation

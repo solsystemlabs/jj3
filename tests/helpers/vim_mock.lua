@@ -170,6 +170,13 @@ _G.vim = {
     end
     return false
   end,
+  tbl_count = function(tbl)
+    local count = 0
+    for _ in pairs(tbl) do
+      count = count + 1
+    end
+    return count
+  end,
   split = function(str, sep, opts)
     if not str then return {} end
     opts = opts or {}
