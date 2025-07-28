@@ -3,17 +3,17 @@
 These are the tasks to be completed for the spec detailed in @.agent-os/specs/2025-07-28-auto-refresh/spec.md
 
 > Created: 2025-07-28
-> Status: Ready for Implementation
+> Status: In Progress (Task 1 Complete)
 
 ## Phase 1: Command-Triggered Refresh Tasks
 
-- [ ] 1. Implement manual refresh functionality
-  - [ ] 1.1 Write tests for manual refresh keybinding behavior
-  - [ ] 1.2 Add 'R' keybinding to jj log buffers using `vim.api.nvim_buf_set_keymap()`
-  - [ ] 1.3 Create `manual_refresh()` function that triggers complete log refresh
-  - [ ] 1.4 Add user feedback during refresh operations (status messages)
-  - [ ] 1.5 Ensure refresh clears existing buffer content before rendering new content
-  - [ ] 1.6 Verify manual refresh works with navigation system and preserves cursor position when possible
+- [x] 1. Implement manual refresh functionality
+  - [x] 1.1 Write tests for manual refresh keybinding behavior
+  - [x] 1.2 Add 'R' keybinding to jj log buffers using `vim.api.nvim_buf_set_keymap()`
+  - [x] 1.3 Create `manual_refresh()` function that triggers complete log refresh
+  - [x] 1.4 Add user feedback during refresh operations (status messages)
+  - [x] 1.5 Ensure refresh clears existing buffer content before rendering new content
+  - [x] 1.6 Verify manual refresh works with navigation system and preserves cursor position when possible
 
 - [ ] 2. Build command-triggered auto-refresh system
   - [ ] 2.1 Write tests for auto-refresh behavior after jj commands

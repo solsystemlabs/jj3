@@ -5,6 +5,7 @@ local M = {}
 -- Import required modules
 local navigation = require("jj.navigation")
 local highlight = require("jj.ui.highlight")
+local refresh = require("jj.refresh")
 
 -- Store navigation state per buffer
 local buffer_navigation_state = {}
@@ -32,6 +33,9 @@ function M.init_navigation_for_buffer(buffer_id, commits)
   
   -- Setup enhanced keymaps with highlighting
   local success = navigation.setup_commit_navigation_keymaps_with_highlight(buffer_id, boundaries)
+  
+  -- Setup refresh keymaps
+  refresh.setup_refresh_keymaps(buffer_id)
   
   -- Highlight the first commit initially if cursor is on it
   local window_id = vim.api.nvim_get_current_win()
