@@ -31,13 +31,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.5 Provide user feedback for queued commands (show pending operations)
   - [x] 3.6 Verify queuing handles multiple rapid commands and error recovery
 
-- [ ] 4. Integrate refresh system with existing plugin architecture
-  - [ ] 4.1 Write integration tests ensuring refresh works with window management
-  - [ ] 4.2 Update existing log display functions to support refresh triggers
-  - [ ] 4.3 Ensure refresh system works with all window configurations (split, floating)
-  - [ ] 4.4 Add refresh state management and cleanup on window close
-  - [ ] 4.5 Verify refresh system doesn't interfere with existing navigation or highlighting
-  - [ ] 4.6 Test complete integration with existing plugin functionality
+- [x] 4. Integrate refresh system with existing plugin architecture
+  - [x] 4.1 Write integration tests ensuring refresh works with window management
+  - [x] 4.2 Update existing log display functions to support refresh triggers
+  - [x] 4.3 Ensure refresh system works with all window configurations (split, floating)
+  - [x] 4.4 Add refresh state management and cleanup on window close
+  - [x] 4.5 Verify refresh system doesn't interfere with existing navigation or highlighting
+  - [x] 4.6 Test complete integration with existing plugin functionality
 
 ## Phase 2: Smart Caching System Tasks (Separate Commit)
 

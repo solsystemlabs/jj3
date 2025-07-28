@@ -209,6 +209,17 @@ end
 -- Close log window
 function M.close_log_window()
 	if log_window_id and vim.api.nvim_win_is_valid(log_window_id) then
+		-- Clean up navigation for the buffer before closing window
+		if log_buffer_id then
+			navigation_integration.cleanup_navigation_for_buffer(log_buffer_id)
+		end
+		
+		-- Reset refresh state when window is closed
+		local ok, refresh = pcall(require, "jj.refresh")
+		if ok then
+			refresh.reset_refresh_state()
+		end
+		
 		vim.api.nvim_win_close(log_window_id, true)
 		log_window_id = nil
 		return true
@@ -447,6 +458,12 @@ function M.cleanup()
 	-- Clean up navigation for any active buffers
 	if log_buffer_id then
 		navigation_integration.cleanup_navigation_for_buffer(log_buffer_id)
+	end
+	
+	-- Reset refresh state on cleanup
+	local ok, refresh = pcall(require, "jj.refresh")
+	if ok then
+		refresh.reset_refresh_state()
 	end
 	
 	M.close_log_window()
