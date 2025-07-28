@@ -3,7 +3,7 @@
 These are the tasks to be completed for the spec detailed in @.agent-os/specs/2025-07-28-auto-refresh/spec.md
 
 > Created: 2025-07-28
-> Status: In Progress (Task 1 Complete)
+> Status: In Progress (Tasks 1-2 Complete)
 
 ## Phase 1: Command-Triggered Refresh Tasks
 
@@ -15,13 +15,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.5 Ensure refresh clears existing buffer content before rendering new content
   - [x] 1.6 Verify manual refresh works with navigation system and preserves cursor position when possible
 
-- [ ] 2. Build command-triggered auto-refresh system
-  - [ ] 2.1 Write tests for auto-refresh behavior after jj commands
-  - [ ] 2.2 Create command execution hooks to detect when jj commands complete
-  - [ ] 2.3 Implement `auto_refresh_after_command()` function for seamless refresh
-  - [ ] 2.4 Add refresh triggering to existing jj command execution workflow
-  - [ ] 2.5 Ensure auto-refresh preserves navigation state and cursor position
-  - [ ] 2.6 Verify auto-refresh works with all supported jj commands (new, rebase, abandon, etc.)
+- [x] 2. Build command-triggered auto-refresh system
+  - [x] 2.1 Write tests for auto-refresh behavior after jj commands
+  - [x] 2.2 Create command execution hooks to detect when jj commands complete
+  - [x] 2.3 Implement `auto_refresh_after_command()` function for seamless refresh
+  - [x] 2.4 Add refresh triggering to existing jj command execution workflow
+  - [x] 2.5 Ensure auto-refresh preserves navigation state and cursor position
+  - [x] 2.6 Verify auto-refresh works with all supported jj commands (new, rebase, abandon, etc.)
 
 - [ ] 3. Implement command queuing during refresh operations
   - [ ] 3.1 Write tests for command queuing behavior and race condition prevention

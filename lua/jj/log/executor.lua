@@ -43,19 +43,28 @@ function M.execute_jj_command(command)
 	local output = vim.fn.system(full_command)
 	local exit_code = vim.v.shell_error
 
+	local result = nil
 	if exit_code == 0 then
-		return {
+		result = {
 			success = true,
 			error = nil,
 			output = output,
 		}
 	else
-		return {
+		result = {
 			success = false,
 			error = "Command failed with exit code " .. exit_code .. ": " .. output,
 			output = nil,
 		}
 	end
+
+	-- Trigger auto-refresh hooks after command completion
+	local ok, auto_refresh = pcall(require, "jj.auto_refresh")
+	if ok then
+		auto_refresh.on_command_complete(command, result.success, result.output or result.error)
+	end
+
+	return result
 end
 
 -- Execute jj command with custom template
@@ -120,19 +129,28 @@ function M.execute_async(command, callback)
 		on_exit = function(_, exit_code)
 			local output = table.concat(output_lines, "\n")
 
+			local result = nil
 			if exit_code == 0 then
-				callback({
+				result = {
 					success = true,
 					error = nil,
 					output = output,
-				})
+				}
 			else
-				callback({
+				result = {
 					success = false,
 					error = "Command failed with exit code " .. exit_code .. ": " .. output,
 					output = nil,
-				})
+				}
 			end
+
+			-- Trigger auto-refresh hooks after async command completion
+			local ok, auto_refresh = pcall(require, "jj.auto_refresh")
+			if ok then
+				auto_refresh.on_command_complete(command, result.success, result.output or result.error)
+			end
+
+			callback(result)
 		end,
 	})
 
