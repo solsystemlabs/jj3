@@ -135,6 +135,19 @@ _G.vim = {
     end
     return result
   end,
+  tbl_extend = function(behavior, ...)
+    -- Simple extend implementation for testing
+    local result = {}
+    for i = 1, select('#', ...) do
+      local tbl = select(i, ...)
+      if type(tbl) == 'table' then
+        for k, v in pairs(tbl) do
+          result[k] = v
+        end
+      end
+    end
+    return result
+  end,
   list_extend = function(list, items)
     for _, item in ipairs(items) do
       table.insert(list, item)
@@ -184,5 +197,18 @@ _G.vim = {
   },
   user_commands = {},
 }
+
+-- Helper functions for mocking specific vim functions in tests
+function M.mock_vim_fn_input(return_value)
+  vim.fn.input = function(prompt)
+    return return_value or ""
+  end
+end
+
+function M.mock_current_line(line_content)
+  vim.api.nvim_get_current_line = function()
+    return line_content or ""
+  end
+end
 
 return M
