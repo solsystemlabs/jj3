@@ -31,13 +31,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.5 Integrate keybinding system with command registry and menu architecture
   - [x] 3.6 Verify all keybinding system tests pass
 
-- [ ] 4. Create default command set with menus
-  - [ ] 4.1 Write tests for all default commands and their menu options
-  - [ ] 4.2 Define default quick actions for common operations (n, r, a, e, s)
-  - [ ] 4.3 Create menu definitions for advanced options (N, R, A, E, S)
-  - [ ] 4.4 Implement context-aware parameter passing for all commands
-  - [ ] 4.5 Add confirmation prompts for destructive operations (abandon, squash)
-  - [ ] 4.6 Verify all default command tests pass
+- [x] 4. Create default command set with menus
+  - [x] 4.1 Write tests for all default commands and their menu options
+  - [x] 4.2 Define default quick actions for common operations (n, r, a, e, s)
+  - [x] 4.3 Create menu definitions for advanced options (N, R, A, E, S)
+  - [x] 4.4 Implement context-aware parameter passing for all commands
+  - [x] 4.5 Add confirmation prompts for destructive operations (abandon, squash)
+  - [x] 4.6 Verify all default command tests pass
 
 - [ ] 5. Build user customization framework
   - [ ] 5.1 Write tests for configuration loading and user command/menu definitions

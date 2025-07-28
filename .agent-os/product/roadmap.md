@@ -38,6 +38,7 @@
 - [ ] Command execution framework - Generic system for running jj commands with arguments `L`
 - [ ] Keybinding registration system - Allow users to register custom keymaps for any jj operation `M`
 - [ ] Default command set - Provide sensible defaults for common operations (new, rebase, squash, edit, abandon) `M`
+- [ ] Extended command set - Additional commands (split, describe, diff, status, git push/fetch, duplicate, bookmark) `L`
 - [ ] Operation feedback system - Display success/error messages with command output `S`
 - [ ] Context-aware commands - Pass selected commit/change IDs to jj operations `M`
 

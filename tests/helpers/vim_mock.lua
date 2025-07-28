@@ -95,6 +95,10 @@ _G.vim = {
       -- Simple shell escaping for testing
       return "'" .. str:gsub("'", "'\"'\"'") .. "'"
     end,
+    confirm = function(msg, choices, default)
+      -- Mock confirmation dialog
+      return default or 1
+    end,
   },
   v = {
     shell_error = 0,
@@ -157,6 +161,14 @@ _G.vim = {
   trim = function(str)
     if not str then return "" end
     return str:match("^%s*(.-)%s*$")
+  end,
+  tbl_contains = function(tbl, value)
+    for _, v in ipairs(tbl) do
+      if v == value then
+        return true
+      end
+    end
+    return false
   end,
   split = function(str, sep, opts)
     if not str then return {} end
