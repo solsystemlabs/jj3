@@ -54,6 +54,7 @@ end
 
 -- Detect commit boundaries by mapping parsed commits to buffer line positions
 function M.detect_commit_boundaries(buffer_id, commits)
+  
   if not buffer_id or not commits then
     return {}
   end
@@ -64,18 +65,22 @@ function M.detect_commit_boundaries(buffer_id, commits)
   if not buffer_lines or #buffer_lines == 0 then
     return boundaries
   end
+  
 
   -- Process commits in the order they appear in the parsed data
-  for _, commit in ipairs(commits) do
+  for commit_idx, commit in ipairs(commits) do
     local start_line = nil
     local end_line = nil
     
-    -- Find the line containing this commit's ID
+    -- Find the line containing this commit's ID (check both full and short versions)
     for line_index = 1, #buffer_lines do
       local line = buffer_lines[line_index]
       
-      -- Check if this line contains the commit ID
-      if line:find(commit.commit_id, 1, true) then
+      -- Check if this line contains the commit ID (full version or 8+ char prefix)
+      local commit_id_full = commit.commit_id
+      local commit_id_short = commit_id_full:sub(1, 8) -- Get first 8 characters
+      
+      if line:find(commit_id_full, 1, true) or line:find(commit_id_short, 1, true) then
         start_line = line_index
         end_line = line_index
         
@@ -110,6 +115,11 @@ function M.detect_commit_boundaries(buffer_id, commits)
     end
   end
   
+  -- Sort boundaries by start_line to ensure correct display order
+  table.sort(boundaries, function(a, b)
+    return a.start_line < b.start_line
+  end)
+  
   return boundaries
 end
 
@@ -132,23 +142,32 @@ function M.get_commit_at_cursor(buffer_id, window_id, boundaries)
   return nil
 end
 
--- Navigate to the next commit (j key functionality)
-function M.navigate_to_next_commit(buffer_id, window_id, boundaries)
-  if not buffer_id or not window_id or not boundaries or #boundaries == 0 then
-    return false
-  end
+-- Common validation for navigation functions
+local function validate_navigation_params(buffer_id, window_id, boundaries)
+  return buffer_id and window_id and boundaries and #boundaries > 0
+end
 
+-- Find the current commit index based on cursor position
+local function find_current_commit_index(window_id, boundaries)
   local cursor_pos = vim.api.nvim_win_get_cursor(window_id)
   local cursor_line = cursor_pos[1]
   
-  -- Find current commit
-  local current_commit_index = nil
   for i, boundary in ipairs(boundaries) do
     if cursor_line >= boundary.start_line and cursor_line <= boundary.end_line then
-      current_commit_index = i
-      break
+      return i, cursor_line
     end
   end
+  
+  return nil, cursor_line
+end
+
+-- Navigate to the next commit (j key functionality)
+function M.navigate_to_next_commit(buffer_id, window_id, boundaries)
+  if not validate_navigation_params(buffer_id, window_id, boundaries) then
+    return false
+  end
+
+  local current_commit_index, cursor_line = find_current_commit_index(window_id, boundaries)
   
   -- If cursor is not on any commit, find the first commit after current line
   if not current_commit_index then
@@ -173,21 +192,11 @@ end
 
 -- Navigate to the previous commit (k key functionality)
 function M.navigate_to_previous_commit(buffer_id, window_id, boundaries)
-  if not buffer_id or not window_id or not boundaries or #boundaries == 0 then
+  if not validate_navigation_params(buffer_id, window_id, boundaries) then
     return false
   end
 
-  local cursor_pos = vim.api.nvim_win_get_cursor(window_id)
-  local cursor_line = cursor_pos[1]
-  
-  -- Find current commit
-  local current_commit_index = nil
-  for i, boundary in ipairs(boundaries) do
-    if cursor_line >= boundary.start_line and cursor_line <= boundary.end_line then
-      current_commit_index = i
-      break
-    end
-  end
+  local current_commit_index, cursor_line = find_current_commit_index(window_id, boundaries)
   
   -- If cursor is not on any commit, find the first commit before current line
   if not current_commit_index then
@@ -286,9 +295,9 @@ function M.clear_commit_highlights(buffer_id)
   return true
 end
 
--- Update navigation functions to include highlighting
-function M.navigate_to_next_commit_with_highlight(buffer_id, window_id, boundaries)
-  if M.navigate_to_next_commit(buffer_id, window_id, boundaries) then
+-- Helper function to add highlighting after navigation
+local function navigate_with_highlight(navigation_func, buffer_id, window_id, boundaries)
+  if navigation_func(buffer_id, window_id, boundaries) then
     -- Get the current commit after navigation and highlight it
     local current_commit = M.get_commit_at_cursor(buffer_id, window_id, boundaries)
     if current_commit then
@@ -299,16 +308,60 @@ function M.navigate_to_next_commit_with_highlight(buffer_id, window_id, boundari
   return false
 end
 
+-- Update navigation functions to include highlighting
+function M.navigate_to_next_commit_with_highlight(buffer_id, window_id, boundaries)
+  return navigate_with_highlight(M.navigate_to_next_commit, buffer_id, window_id, boundaries)
+end
+
 function M.navigate_to_previous_commit_with_highlight(buffer_id, window_id, boundaries)
-  if M.navigate_to_previous_commit(buffer_id, window_id, boundaries) then
-    -- Get the current commit after navigation and highlight it
-    local current_commit = M.get_commit_at_cursor(buffer_id, window_id, boundaries)
-    if current_commit then
-      M.highlight_commit_block(buffer_id, current_commit)
-    end
-    return true
+  return navigate_with_highlight(M.navigate_to_previous_commit, buffer_id, window_id, boundaries)
+end
+
+-- Navigate to the first commit (gg functionality)
+function M.navigate_to_first_commit(buffer_id, window_id, boundaries)
+  if not validate_navigation_params(buffer_id, window_id, boundaries) then
+    return false
   end
-  return false
+
+  local first_boundary = boundaries[1]
+  vim.api.nvim_win_set_cursor(window_id, {first_boundary.start_line, 0})
+  return true
+end
+
+-- Navigate to the last commit (G functionality)
+function M.navigate_to_last_commit(buffer_id, window_id, boundaries)
+  if not validate_navigation_params(buffer_id, window_id, boundaries) then
+    return false
+  end
+
+  local last_boundary = boundaries[#boundaries]
+  vim.api.nvim_win_set_cursor(window_id, {last_boundary.start_line, 0})
+  return true
+end
+
+-- Navigate to first commit with highlighting
+function M.navigate_to_first_commit_with_highlight(buffer_id, window_id, boundaries)
+  return navigate_with_highlight(M.navigate_to_first_commit, buffer_id, window_id, boundaries)
+end
+
+-- Navigate to last commit with highlighting
+function M.navigate_to_last_commit_with_highlight(buffer_id, window_id, boundaries)
+  return navigate_with_highlight(M.navigate_to_last_commit, buffer_id, window_id, boundaries)
+end
+
+-- Helper function to create keymap with fallback
+local function create_navigation_keymap(buffer_id, key, navigation_func, fallback_key, boundaries)
+  vim.api.nvim_buf_set_keymap(buffer_id, 'n', key, '', {
+    noremap = true,
+    silent = true,
+    callback = function()
+      local window_id = vim.api.nvim_get_current_win()
+      if not navigation_func(buffer_id, window_id, boundaries) then
+        -- If navigation failed, fall back to normal movement
+        vim.api.nvim_feedkeys(fallback_key or key, 'n', false)
+      end
+    end
+  })
 end
 
 -- Enhanced keymap setup that includes highlighting
@@ -317,31 +370,17 @@ function M.setup_commit_navigation_keymaps_with_highlight(buffer_id, boundaries)
     return false
   end
   
-  -- Define j key mapping for next commit with highlighting
-  vim.api.nvim_buf_set_keymap(buffer_id, 'n', 'j', '', {
-    noremap = true,
-    silent = true,
-    callback = function()
-      local window_id = vim.api.nvim_get_current_win()
-      if not M.navigate_to_next_commit_with_highlight(buffer_id, window_id, boundaries) then
-        -- If navigation failed, fall back to normal j movement
-        vim.api.nvim_feedkeys('j', 'n', false)
-      end
-    end
-  })
+  -- Setup all navigation keymaps
+  local keymaps = {
+    {key = 'j', func = M.navigate_to_next_commit_with_highlight},
+    {key = 'k', func = M.navigate_to_previous_commit_with_highlight},
+    {key = 'gg', func = M.navigate_to_first_commit_with_highlight},
+    {key = 'G', func = M.navigate_to_last_commit_with_highlight}
+  }
   
-  -- Define k key mapping for previous commit with highlighting
-  vim.api.nvim_buf_set_keymap(buffer_id, 'n', 'k', '', {
-    noremap = true,
-    silent = true,
-    callback = function()
-      local window_id = vim.api.nvim_get_current_win()
-      if not M.navigate_to_previous_commit_with_highlight(buffer_id, window_id, boundaries) then
-        -- If navigation failed, fall back to normal k movement
-        vim.api.nvim_feedkeys('k', 'n', false)
-      end
-    end
-  })
+  for _, keymap in ipairs(keymaps) do
+    create_navigation_keymap(buffer_id, keymap.key, keymap.func, keymap.key, boundaries)
+  end
   
   return true
 end

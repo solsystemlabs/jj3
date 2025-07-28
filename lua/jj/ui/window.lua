@@ -365,6 +365,7 @@ function M.render_log_content(raw_colored_output, commits)
 	if not buffer_id then
 		return false
 	end
+	
 
 	-- Use renderer to display content
 	local result = renderer.render_to_buffer(buffer_id, raw_colored_output)

@@ -609,6 +609,109 @@ describe("JJ Navigation", function()
       assert.is_not_nil(mock_keymaps[buffer_id])
       assert.is_not_nil(mock_keymaps[buffer_id]["nj"])
       assert.is_not_nil(mock_keymaps[buffer_id]["nk"])
+      assert.is_not_nil(mock_keymaps[buffer_id]["ngg"])
+      assert.is_not_nil(mock_keymaps[buffer_id]["nG"])
+    end)
+  end)
+
+  describe("first/last commit navigation", function()
+    it("should navigate to first commit with gg", function()
+      local buffer_id = create_test_buffer_with_log(sample_log_lines)
+      local boundaries = navigation.detect_commit_boundaries(buffer_id, sample_commits)
+      
+      -- Start at second commit (line 3)
+      mock_cursor_positions[1] = {3, 0}
+      
+      local result = navigation.navigate_to_first_commit(buffer_id, 1, boundaries)
+      
+      assert.is_true(result)
+      -- Should move to line 1 (first commit)
+      assert.equals(1, mock_cursor_positions[1][1])
+    end)
+
+    it("should navigate to last commit with G", function()
+      local buffer_id = create_test_buffer_with_log(sample_log_lines)
+      local boundaries = navigation.detect_commit_boundaries(buffer_id, sample_commits)
+      
+      -- Start at first commit (line 1)
+      mock_cursor_positions[1] = {1, 0}
+      
+      local result = navigation.navigate_to_last_commit(buffer_id, 1, boundaries)
+      
+      assert.is_true(result)
+      -- Should move to line 5 (last commit: e9f12a34)
+      assert.equals(5, mock_cursor_positions[1][1])
+    end)
+
+    it("should navigate to first commit with highlighting", function()
+      local buffer_id = create_test_buffer_with_log(sample_log_lines)
+      local boundaries = navigation.detect_commit_boundaries(buffer_id, sample_commits)
+      
+      -- Start at second commit
+      mock_cursor_positions[1] = {3, 0}
+      
+      local result = navigation.navigate_to_first_commit_with_highlight(buffer_id, 1, boundaries)
+      
+      assert.is_true(result)
+      assert.equals(1, mock_cursor_positions[1][1]) -- Should move to first commit
+      assert.is_true(#mock_highlights[buffer_id] > 0) -- Should have highlights
+    end)
+
+    it("should navigate to last commit with highlighting", function()
+      local buffer_id = create_test_buffer_with_log(sample_log_lines)
+      local boundaries = navigation.detect_commit_boundaries(buffer_id, sample_commits)
+      
+      -- Start at first commit
+      mock_cursor_positions[1] = {1, 0}
+      
+      local result = navigation.navigate_to_last_commit_with_highlight(buffer_id, 1, boundaries)
+      
+      assert.is_true(result)
+      assert.equals(5, mock_cursor_positions[1][1]) -- Should move to last commit
+      assert.is_true(#mock_highlights[buffer_id] > 0) -- Should have highlights
+    end)
+
+    it("should handle empty boundaries gracefully", function()
+      local result_first = navigation.navigate_to_first_commit(1, 1, {})
+      local result_last = navigation.navigate_to_last_commit(1, 1, {})
+      
+      assert.is_false(result_first)
+      assert.is_false(result_last)
+    end)
+
+    it("should handle nil parameters gracefully", function()
+      assert.is_false(navigation.navigate_to_first_commit(nil, 1, {}))
+      assert.is_false(navigation.navigate_to_first_commit(1, nil, {}))
+      assert.is_false(navigation.navigate_to_first_commit(1, 1, nil))
+      
+      assert.is_false(navigation.navigate_to_last_commit(nil, 1, {}))
+      assert.is_false(navigation.navigate_to_last_commit(1, nil, {}))
+      assert.is_false(navigation.navigate_to_last_commit(1, 1, nil))
+    end)
+
+    it("should work with single commit", function()
+      -- Create a buffer with only one commit
+      local single_commit_lines = {"@  b34b2705 user@example.com 2023-05-14T12:00:00 main"}
+      local single_commit = {{
+        commit_id = "b34b2705",
+        change_id = "kxvskzvp",
+        author_name = "user@example.com",
+        timestamp = "2023-05-14T12:00:00"
+      }}
+      
+      local buffer_id = create_test_buffer_with_log(single_commit_lines)
+      local boundaries = navigation.detect_commit_boundaries(buffer_id, single_commit)
+      
+      mock_cursor_positions[1] = {1, 0}
+      
+      -- Both gg and G should work and stay at the same position
+      local result_first = navigation.navigate_to_first_commit(buffer_id, 1, boundaries)
+      assert.is_true(result_first)
+      assert.equals(1, mock_cursor_positions[1][1])
+      
+      local result_last = navigation.navigate_to_last_commit(buffer_id, 1, boundaries)
+      assert.is_true(result_last)
+      assert.equals(1, mock_cursor_positions[1][1])
     end)
   end)
 end)

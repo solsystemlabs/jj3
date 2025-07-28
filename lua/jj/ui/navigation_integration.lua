@@ -11,6 +11,7 @@ local buffer_navigation_state = {}
 
 -- Initialize navigation for a jj log buffer
 function M.init_navigation_for_buffer(buffer_id, commits)
+  
   if not buffer_id or not commits or #commits == 0 then
     return false
   end

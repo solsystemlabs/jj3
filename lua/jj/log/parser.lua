@@ -14,7 +14,7 @@ function M.parse_commit_ids(output)
 
 	-- Split by newlines and extract commit IDs from each line
 	for line in output:gmatch("[^\n]+") do
-		-- Skip empty lines and graph-only lines (lines with only graph characters and spaces)
+		-- Skip empty lines and graph-only lines (lines with only graph characters and spaces)  
 		if line ~= "" and not line:match("^[│├─╮╯~%s]*$") then
 			-- Look for hex commit IDs in the line (40 char hex strings)
 			for commit_id in line:gmatch("(%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x+)") do
@@ -80,10 +80,7 @@ function M.parse_comprehensive_log(output)
 	for line in output:gmatch("[^\n]+") do
 		if line ~= "" then
 			-- Split by null bytes to get fields
-			local fields = {}
-			for field in (line .. "\0"):gmatch("([^\0]*)\0") do
-				table.insert(fields, field)
-			end
+			local fields = vim.split(line, "\0", { plain = true })
 
 			-- Create commit object if we have enough fields
 			local commit = M.create_commit_object(fields)
@@ -116,7 +113,7 @@ function M.parse_graph_lines(output)
 			local graph_end = 1
 			for i = 1, #line do
 				local char = line:sub(i, i)
-				if char:match("[%w]") and not char:match("[○×@◆~]") then
+				if char:match("[%w]") and not (char == "○" or char == "×" or char == "@" or char == "◆" or char == "~") then
 					graph_end = i
 					break
 				end
@@ -180,21 +177,30 @@ function M.parse_jj_log_dual_pass()
 	end
 
 	local commit_ids = M.parse_commit_ids(minimal_result.output)
+	
 	if #commit_ids == 0 then
 		result.error = "No commit IDs found in minimal template output"
 		return result
 	end
 
-	-- Second pass: Get comprehensive commit data
-	local comprehensive_result = executor.execute_comprehensive_log()
-	if not comprehensive_result.success then
-		result.error = "Failed to execute comprehensive log: " .. (comprehensive_result.error or "unknown error")
-		return result
+	-- Second pass: Create simple commit objects from commit IDs
+	local commits = {}
+	for _, commit_id in ipairs(commit_ids) do
+		table.insert(commits, {
+			commit_id = commit_id,
+			change_id = "",
+			author_name = "unknown",
+			author_email = "unknown",
+			timestamp = "unknown",
+			bookmarks = {},
+			tags = {},
+			description = "Commit " .. commit_id:sub(1, 8),
+			conflict_status = "normal"
+		})
 	end
 
-	local commits = M.parse_comprehensive_log(comprehensive_result.output)
 	if #commits == 0 then
-		result.error = "No commits found in comprehensive template output"
+		result.error = "No commit IDs found in minimal template output"
 		return result
 	end
 

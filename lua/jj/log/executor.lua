@@ -5,7 +5,7 @@ local M = {}
 local repository = require("jj.utils.repository")
 
 -- Template definitions
-local MINIMAL_TEMPLATE = 'commit_id ++ "\\x00" ++ change_id'
+local MINIMAL_TEMPLATE = 'commit_id ++ "\\x00" ++ change_id ++ "\\n"'
 
 local COMPREHENSIVE_TEMPLATE = 'commit_id ++ "\\x00" ++ change_id ++ "\\x00" ++ '
 	.. 'author.name() ++ "\\x00" ++ author.email() ++ "\\x00" ++ '
@@ -15,7 +15,7 @@ local COMPREHENSIVE_TEMPLATE = 'commit_id ++ "\\x00" ++ change_id ++ "\\x00" ++ 
 	.. 'if(empty, "empty", "normal") ++ "\\x00" ++ '
 	.. 'if(hidden, "hidden", "normal") ++ "\\x00" ++ '
 	.. 'description.first_line() ++ "\\x00" ++ '
-	.. 'if(git_head, git_head, "")'
+	.. 'if(git_head, git_head, "") ++ "\\n"'
 
 -- Execute a jj command synchronously
 function M.execute_jj_command(command)
@@ -60,7 +60,9 @@ end
 
 -- Execute jj command with custom template
 function M.execute_with_template(command, template)
-	local template_arg = "--template=" .. vim.fn.shellescape(template)
+	-- Use manual quoting instead of shellescape to avoid over-escaping
+	local escaped_template = "'" .. template:gsub("'", "'\"'\"'") .. "'"
+	local template_arg = "--template=" .. escaped_template
 	local full_command = command .. " " .. template_arg
 	return M.execute_jj_command(full_command)
 end

@@ -94,6 +94,14 @@ function M.show_log(config)
     return false
   end
   
+  -- Get parsed commit data for navigation
+  local log_data, parse_error = get_log_data()
+  local commits = (log_data and log_data.commits) or {}
+  if parse_error then
+    show_info_message("Navigation disabled: " .. parse_error)
+  end
+  
+  
   -- Configure window if config provided
   if config then
     window.configure(config)
@@ -107,7 +115,7 @@ function M.show_log(config)
   end
   
   -- Render content to window
-  local render_success = window.render_log_content(colored_output)
+  local render_success = window.render_log_content(colored_output, commits)
   if not render_success then
     show_error_message("rendering_failed", "Could not render log content to buffer")
     window.close_log_window()
@@ -166,8 +174,15 @@ function M.refresh_log()
     return false
   end
   
+  -- Get parsed commit data for navigation
+  local log_data, parse_error = get_log_data()
+  local commits = (log_data and log_data.commits) or {}
+  if parse_error then
+    show_info_message("Navigation disabled: " .. parse_error)
+  end
+  
   -- Render updated content
-  local render_success = window.render_log_content(colored_output)
+  local render_success = window.render_log_content(colored_output, commits)
   if not render_success then
     show_error_message("rendering_failed", "Could not refresh log content")
     return false
@@ -343,8 +358,8 @@ function M.show_log_with_options(jj_options, window_config)
     return false
   end
   
-  -- Render content
-  local render_success = window.render_log_content(log_result.output)
+  -- Render content (no commit navigation for custom commands)
+  local render_success = window.render_log_content(log_result.output, {})
   if not render_success then
     show_error_message("rendering_failed")
     window.close_log_window()

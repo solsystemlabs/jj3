@@ -145,6 +145,32 @@ _G.vim = {
     if not str then return "" end
     return str:match("^%s*(.-)%s*$")
   end,
+  split = function(str, sep, opts)
+    if not str then return {} end
+    opts = opts or {}
+    local result = {}
+    
+    if opts.plain then
+      -- Plain text split - handle null bytes and other special chars
+      local start = 1
+      while true do
+        local found = str:find(sep, start, true)
+        if not found then
+          table.insert(result, str:sub(start))
+          break
+        end
+        table.insert(result, str:sub(start, found - 1))
+        start = found + #sep
+      end
+    else
+      -- Pattern split
+      for part in str:gmatch("([^" .. sep .. "]+)") do
+        table.insert(result, part)
+      end
+    end
+    
+    return result
+  end,
   notify = function(message, level)
     -- Mock notification
   end,
