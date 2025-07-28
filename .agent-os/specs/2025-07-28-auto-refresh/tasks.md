@@ -3,7 +3,7 @@
 These are the tasks to be completed for the spec detailed in @.agent-os/specs/2025-07-28-auto-refresh/spec.md
 
 > Created: 2025-07-28
-> Status: In Progress (Tasks 1-2 Complete)
+> Status: In Progress (Tasks 1-3 Complete)
 
 ## Phase 1: Command-Triggered Refresh Tasks
 
@@ -23,13 +23,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.5 Ensure auto-refresh preserves navigation state and cursor position
   - [x] 2.6 Verify auto-refresh works with all supported jj commands (new, rebase, abandon, etc.)
 
-- [ ] 3. Implement command queuing during refresh operations
-  - [ ] 3.1 Write tests for command queuing behavior and race condition prevention
-  - [ ] 3.2 Create `command_queue` module to manage concurrent operations
-  - [ ] 3.3 Implement queue system that blocks new commands during active refresh
-  - [ ] 3.4 Add command execution after refresh completion
-  - [ ] 3.5 Provide user feedback for queued commands (show pending operations)
-  - [ ] 3.6 Verify queuing handles multiple rapid commands and error recovery
+- [x] 3. Implement command queuing during refresh operations
+  - [x] 3.1 Write tests for command queuing behavior and race condition prevention
+  - [x] 3.2 Create `command_queue` module to manage concurrent operations
+  - [x] 3.3 Implement queue system that blocks new commands during active refresh
+  - [x] 3.4 Add command execution after refresh completion
+  - [x] 3.5 Provide user feedback for queued commands (show pending operations)
+  - [x] 3.6 Verify queuing handles multiple rapid commands and error recovery
 
 - [ ] 4. Integrate refresh system with existing plugin architecture
   - [ ] 4.1 Write integration tests ensuring refresh works with window management

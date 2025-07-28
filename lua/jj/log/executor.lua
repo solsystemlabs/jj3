@@ -19,6 +19,25 @@ local COMPREHENSIVE_TEMPLATE = 'commit_id ++ "\\x00" ++ change_id ++ "\\x00" ++ 
 
 -- Execute a jj command synchronously
 function M.execute_jj_command(command)
+	-- Check if command should be queued due to active refresh
+	local queue_ok, command_queue = pcall(require, "jj.command_queue")
+	if queue_ok and not command_queue.should_execute_command(command) then
+		-- Queue the command for later execution
+		local queued = command_queue.queue_command(command, function()
+			-- Execute the command when refresh completes
+			M.execute_jj_command(command)
+		end)
+		
+		if queued then
+			return {
+				success = false,
+				error = "Command queued - refresh in progress",
+				output = nil,
+				queued = true
+			}
+		end
+	end
+
 	-- Validate repository context first
 	local validation = repository.validate_repository()
 	if not validation.valid then
@@ -88,6 +107,26 @@ end
 
 -- Execute command asynchronously with callback
 function M.execute_async(command, callback)
+	-- Check if command should be queued due to active refresh
+	local queue_ok, command_queue = pcall(require, "jj.command_queue")
+	if queue_ok and not command_queue.should_execute_command(command) then
+		-- Queue the command for later execution
+		local queued = command_queue.queue_command(command, function()
+			-- Execute the command when refresh completes
+			M.execute_async(command, callback)
+		end)
+		
+		if queued then
+			callback({
+				success = false,
+				error = "Command queued - refresh in progress",
+				output = nil,
+				queued = true
+			})
+			return
+		end
+	end
+
 	-- Validate repository context first
 	local validation = repository.validate_repository()
 	if not validation.valid then

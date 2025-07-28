@@ -161,6 +161,18 @@ function M.auto_refresh_after_command(command, success, output, window_mock)
   -- Update last refresh time
   auto_refresh_state.last_refresh_time = current_time
   
+  -- Check if refresh is already in progress
+  local ok, command_queue = pcall(require, "jj.command_queue")
+  if ok and command_queue.is_refresh_active() then
+    -- Refresh is already in progress, don't trigger another one
+    return false
+  end
+  
+  -- Mark refresh as active
+  if ok then
+    command_queue.on_refresh_start()
+  end
+  
   -- Provide user feedback
   vim.notify("jj.nvim: Auto-refreshing after " .. command, vim.log.levels.INFO)
   
@@ -184,9 +196,18 @@ function M.auto_refresh_after_command(command, success, output, window_mock)
     end
   else
     -- In real usage, trigger the actual refresh
-    local ok, log = pcall(require, "jj.log")
-    if ok then
+    local log_ok, log = pcall(require, "jj.log")
+    if log_ok then
       success_refresh = log.refresh_log()
+    end
+  end
+  
+  -- Mark refresh as complete and process any queued commands
+  if ok then
+    if success_refresh then
+      command_queue.on_refresh_complete()
+    else
+      command_queue.on_refresh_error("Log refresh failed")
     end
   end
   
@@ -197,8 +218,8 @@ function M.auto_refresh_after_command(command, success, output, window_mock)
       buffer_line_count = window_mock.get_buffer_line_count()
     elseif not window_mock then
       -- Get actual buffer line count
-      local ok, window = pcall(require, "jj.ui.window")
-      if ok then
+      local window_ok, window = pcall(require, "jj.ui.window")
+      if window_ok then
         local buffer_id = window.get_log_buffer_id()
         if buffer_id then
           buffer_line_count = vim.api.nvim_buf_line_count(buffer_id)
