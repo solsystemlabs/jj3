@@ -39,20 +39,18 @@ local transitions = {
   },
   
   [types.States.SELECTING_TARGET] = {
-    [types.Events.TARGET_SELECTED] = function(machine, event_data)
-      local context = machine.command_context
-      if context and context.phase_index < #context.command_def.phases then
-        -- More phases remaining - this shouldn't happen for normal target selection
-        return types.States.SELECTING_TARGET
-      else
-        return types.States.EXECUTING_COMMAND
-      end
-    end,
+    [types.Events.TARGET_SELECTED] = types.States.EXECUTING_COMMAND,
     [types.Events.SELECTION_CANCELLED] = types.States.BROWSE
   },
   
   [types.States.SELECTING_MULTIPLE] = {
-    [types.Events.TARGET_SELECTED] = types.States.SELECTING_MULTIPLE, -- Stay in same state for multi-select
+    [types.Events.TARGET_SELECTED] = function(machine, event_data)
+      if event_data.confirm_multi_select then
+        return types.States.EXECUTING_COMMAND
+      else
+        return types.States.SELECTING_MULTIPLE -- Stay in same state for multi-select
+      end
+    end,
     [types.Events.SELECTION_CANCELLED] = types.States.BROWSE
   },
   
@@ -70,17 +68,21 @@ local transitions = {
 -- State entry callbacks
 local state_entry_callbacks = {
   [types.States.SELECTING_SOURCE] = function(machine, event_data)
-    machine:_initialize_command_context(event_data.command_def)
+    if event_data.command_def then
+      machine:_initialize_command_context(event_data.command_def)
+    end
   end,
   
   [types.States.SELECTING_TARGET] = function(machine, event_data)
-    if not machine.command_context then
+    if not machine.command_context and event_data.command_def then
       machine:_initialize_command_context(event_data.command_def)
     end
   end,
   
   [types.States.SELECTING_MULTIPLE] = function(machine, event_data)
-    machine:_initialize_command_context(event_data.command_def)
+    if event_data.command_def then
+      machine:_initialize_command_context(event_data.command_def)
+    end
   end,
   
   [types.States.EXECUTING_COMMAND] = function(machine, event_data)

@@ -28,12 +28,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.4 Create commit highlighting system for different selection phases
   - [x] 3.5 Verify all visual feedback tests pass
 
-- [ ] 4. Implement Selection Navigation and Confirmation
-  - [ ] 4.1 Write tests for selection mode navigation and confirmation
-  - [ ] 4.2 Add state-aware keybinding system for selection modes
-  - [ ] 4.3 Implement commit ID extraction from cursor position
-  - [ ] 4.4 Add selection confirmation and cancellation handling
-  - [ ] 4.5 Verify all navigation and confirmation tests pass
+- [x] 4. Implement Selection Navigation and Confirmation
+  - [x] 4.1 Write tests for selection mode navigation and confirmation
+  - [x] 4.2 Add state-aware keybinding system for selection modes
+  - [x] 4.3 Implement commit ID extraction from cursor position
+  - [x] 4.4 Add selection confirmation and cancellation handling
+  - [x] 4.5 Verify all navigation and confirmation tests pass
 
 - [ ] 5. Integrate with Existing Command System
   - [ ] 5.1 Write tests for command integration and execution
