@@ -21,12 +21,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.4 Add command validation and phase progression logic
   - [x] 2.5 Verify all command context tests pass
 
-- [ ] 3. Implement Visual Feedback System
-  - [ ] 3.1 Write tests for phase-aware visual indicators
-  - [ ] 3.2 Add state-specific highlighting for selection phases
-  - [ ] 3.3 Implement status line integration for selection progress
-  - [ ] 3.4 Create commit highlighting system for different selection phases
-  - [ ] 3.5 Verify all visual feedback tests pass
+- [x] 3. Implement Visual Feedback System
+  - [x] 3.1 Write tests for phase-aware visual indicators
+  - [x] 3.2 Add state-specific highlighting for selection phases
+  - [x] 3.3 Implement floating window for selection progress (updated from status line)
+  - [x] 3.4 Create commit highlighting system for different selection phases
+  - [x] 3.5 Verify all visual feedback tests pass
 
 - [ ] 4. Implement Selection Navigation and Confirmation
   - [ ] 4.1 Write tests for selection mode navigation and confirmation
