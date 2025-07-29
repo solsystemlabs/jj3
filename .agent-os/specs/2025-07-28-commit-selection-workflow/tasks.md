@@ -7,12 +7,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [ ] 1. Implement State Machine Framework
-  - [ ] 1.1 Write tests for state machine core functionality
-  - [ ] 1.2 Create `selection_state.lua` module with state definitions and transitions
-  - [ ] 1.3 Implement event handling and state transition logic
-  - [ ] 1.4 Add buffer-local state machine instance management
-  - [ ] 1.5 Verify all state machine tests pass
+- [x] 1. Implement State Machine Framework
+  - [x] 1.1 Write tests for state machine core functionality
+  - [x] 1.2 Create `selection_state.lua` module with state definitions and transitions
+  - [x] 1.3 Implement event handling and state transition logic
+  - [x] 1.4 Add buffer-local state machine instance management
+  - [x] 1.5 Verify all state machine tests pass
 
 - [ ] 2. Implement Command Context Management
   - [ ] 2.1 Write tests for command context structure and operations
