@@ -27,24 +27,40 @@ local DEFAULT_COMMANDS = {
 					desc = "New commit with multiple parents",
 					cmd = "new",
 					args = { "-m", "{user_input}", "{multi_target}" },
+					phases = {
+						{
+							key = "multi_target",
+							prompt = "Select multiple parent commits (Enter to confirm)",
+							multi_select = true,
+						},
+					},
 				},
 				{
 					key = "2",
 					desc = "New commit before selected",
 					cmd = "new",
 					args = { "-m", "{user_input}", "--insert-before", "{target}" },
+					phases = {
+						{ key = "target", prompt = "Select target commit to create new commit before" },
+					},
 				},
 				{
 					key = "3",
 					desc = "New commit after selected",
 					cmd = "new",
 					args = { "-m", "{user_input}", "--insert-after", "{target}" },
+					phases = {
+						{ key = "target", prompt = "Select target commit to create new commit after" },
+					},
 				},
 				{
 					key = "4",
 					desc = "New commit without edit",
 					cmd = "new",
 					args = { "-m", "{user_input}", "--no-edit", "{target}" },
+					phases = {
+						{ key = "target", prompt = "Select target commit for new commit (no edit)" },
+					},
 				},
 			},
 		},
@@ -89,13 +105,10 @@ local DEFAULT_COMMANDS = {
 	abandon = {
 		quick_action = {
 			cmd = "abandon",
-			args = { "{target}" },
+			args = { "{change_id}" },
 			keymap = "a",
 			description = "Abandon selected change",
 			confirm = true,
-			phases = {
-				{ key = "target", prompt = "Select commit to abandon" },
-			},
 		},
 		menu = {
 			keymap = "A",

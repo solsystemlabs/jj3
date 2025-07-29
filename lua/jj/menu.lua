@@ -36,12 +36,19 @@ end
 
 -- Create context for menu option execution
 function M.create_menu_option_context(option)
-  return {
+  local context = {
     cmd = option.cmd,
     args = option.args,
     key = option.key,
     desc = option.desc
   }
+  
+  -- Include phases if the menu option has them (for selection workflows)
+  if option.phases then
+    context.phases = option.phases
+  end
+  
+  return context
 end
 
 -- Show command menu using vim.ui.select
@@ -89,26 +96,53 @@ function M.show_command_menu(command_name)
       -- Execute the selected menu option
       local option_context = M.create_menu_option_context(choice)
       
-      -- Merge cursor context with option context
-      local execution_context = vim.tbl_extend("force", context, option_context)
-      
-      -- Execute command through command execution framework
-      local result = command_execution.execute_command(command_name, "menu_option", execution_context)
-      
-      -- Provide user feedback
-      if result.success then
-        local message = "Command executed: " .. (result.executed_command or "jj " .. command_name)
-        vim.notify(message, vim.log.levels.INFO)
+      -- Check if this menu option requires selection workflow
+      if option_context.phases then
+        -- Create a temporary command definition for this menu option
+        local menu_command_def = {
+          quick_action = {
+            cmd = option_context.cmd,
+            args = option_context.args,
+            description = option_context.desc
+          },
+          phases = option_context.phases
+        }
         
-        -- Directly refresh the log window after successful command
-        local log = require("jj.log.init")
-        log.refresh_log()
-      else
-        local message = "Command failed: " .. (result.executed_command or "jj " .. command_name)
-        if result.error then
-          message = message .. " (" .. result.error .. ")"
+        -- Process the command definition to add command_type
+        local command_context = require("jj.command_context")
+        local processed_def = command_context.process_command_definition("menu_temp", menu_command_def)
+        
+        -- Route through selection integration system
+        local selection_integration = require("jj.selection_integration")
+        local bufnr = vim.api.nvim_get_current_buf()
+        local result = selection_integration.execute_command("menu_option_" .. option_context.key, bufnr, processed_def)
+        
+        if result.requires_selection then
+          vim.notify(result.message or "Selection mode started", vim.log.levels.INFO)
+          return -- Selection workflow will handle completion
         end
-        vim.notify(message, vim.log.levels.ERROR)
+      else
+        -- Merge cursor context with option context for immediate execution
+        local execution_context = vim.tbl_extend("force", context, option_context)
+        
+        -- Execute command through command execution framework
+        local result = command_execution.execute_command(command_name, "menu_option", execution_context)
+        
+        -- Provide user feedback
+        if result.success then
+          local message = "Command executed: " .. (result.executed_command or "jj " .. command_name)
+          vim.notify(message, vim.log.levels.INFO)
+          
+          -- Directly refresh the log window after successful command
+          local log = require("jj.log.init")
+          log.refresh_log()
+        else
+          local message = "Command failed: " .. (result.executed_command or "jj " .. command_name)
+          if result.error then
+            message = message .. " (" .. result.error .. ")"
+          end
+          vim.notify(message, vim.log.levels.ERROR)
+        end
       end
     end
   end)

@@ -12,8 +12,8 @@ local types = require("jj.types")
 local active_workflows = {}
 local execution_history = {}
 
-function M.execute_command(command_name, bufnr)
-	local command_def = command_context.get_command_definition(command_name)
+function M.execute_command(command_name, bufnr, command_def_override)
+	local command_def = command_def_override or command_context.get_command_definition(command_name)
 
 	if not command_def then
 		return {
