@@ -35,9 +35,9 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 4.4 Add selection confirmation and cancellation handling
   - [x] 4.5 Verify all navigation and confirmation tests pass
 
-- [ ] 5. Integrate with Existing Command System
-  - [ ] 5.1 Write tests for command integration and execution
-  - [ ] 5.2 Modify existing command definitions to support target selection
-  - [ ] 5.3 Update command execution to handle selection contexts
-  - [ ] 5.4 Add error handling and recovery for failed selections
-  - [ ] 5.5 Verify all integration tests pass
+- [x] 5. Integrate with Existing Command System
+  - [x] 5.1 Write tests for command integration and execution
+  - [x] 5.2 Modify existing command definitions to support target selection
+  - [x] 5.3 Update command execution to handle selection contexts
+  - [x] 5.4 Add error handling and recovery for failed selections
+  - [x] 5.5 Verify all integration tests pass
