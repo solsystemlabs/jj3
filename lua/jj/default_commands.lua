@@ -268,9 +268,6 @@ function M.execute_with_confirmation(command_name, context)
 		}
 	end
 
-	-- Debug: Show what context we received
-	vim.notify(string.format("Debug: execute_with_confirmation for %s, context: %s", 
-		command_name, vim.inspect(context)), vim.log.levels.INFO)
 
 	-- Check if confirmation is required
 	local requires_confirmation = command_def.quick_action and command_def.quick_action.confirm
@@ -296,8 +293,6 @@ function M.execute_with_confirmation(command_name, context)
 	-- Build and execute command
 	local args = command_def.quick_action.args or {}
 	local substituted_args = {}
-	
-	vim.notify(string.format("Debug: Original args: %s", vim.inspect(args)), vim.log.levels.INFO)
 
 	for _, arg in ipairs(args) do
 		if arg == "{commit_id}" then
@@ -338,9 +333,6 @@ function M.execute_with_confirmation(command_name, context)
 		table.insert(command_parts, arg)
 	end
 	local full_command = table.concat(command_parts, " ")
-	
-	vim.notify(string.format("Debug: Substituted args: %s", vim.inspect(substituted_args)), vim.log.levels.INFO)
-	vim.notify(string.format("Debug: Final command: '%s'", full_command), vim.log.levels.INFO)
 
 	-- Execute through executor
 	return executor.execute_jj_command(full_command)

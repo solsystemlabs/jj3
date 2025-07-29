@@ -336,22 +336,17 @@ function M._get_current_cursor_context()
   local bufnr = vim.api.nvim_get_current_buf()
   local window_id = vim.api.nvim_get_current_win()
   
-  vim.notify(string.format("Debug: Getting cursor context for buffer %d, window %d", bufnr, window_id), vim.log.levels.INFO)
-  
   local success, result = pcall(function()
     local navigation_integration = require("jj.ui.navigation_integration")
     
-    -- Debug: Check if navigation is enabled for this buffer
+    -- Check if navigation is enabled for this buffer
     local is_nav_enabled = navigation_integration.is_navigation_enabled(bufnr)
-    vim.notify(string.format("Debug: Navigation enabled: %s", tostring(is_nav_enabled)), vim.log.levels.INFO)
     
     if not is_nav_enabled then
-      vim.notify("Debug: Navigation not enabled, falling back to text parsing", vim.log.levels.WARN)
-      -- Fall back to old method temporarily
+      -- Fall back to text parsing method
       local selection_navigation = require("jj.selection_navigation")
       local line_number = vim.api.nvim_win_get_cursor(0)[1]
       local commit_id = selection_navigation.get_commit_id_at_cursor(bufnr, line_number)
-      vim.notify(string.format("Debug: Text parsing found commit_id: %s", tostring(commit_id)), vim.log.levels.INFO)
       if commit_id then
         return {
           commit_id = commit_id,
@@ -365,13 +360,6 @@ function M._get_current_cursor_context()
     
     -- Get the commit object at cursor position using the proper navigation system
     local current_commit = navigation_integration.get_current_commit(bufnr, window_id)
-    vim.notify(string.format("Debug: Navigation integration found commit: %s", 
-      current_commit and current_commit.commit_id or "nil"), vim.log.levels.INFO)
-    
-    -- Debug: Show the full commit object
-    if current_commit then
-      vim.notify(string.format("Debug: Full commit object: %s", vim.inspect(current_commit)), vim.log.levels.INFO)
-    end
     
     if current_commit and current_commit.commit_id then
       -- Use nested commit_data if available, fallback to top-level values
@@ -387,17 +375,11 @@ function M._get_current_cursor_context()
         target = commit_id
       }
     else
-      -- Debug: Show cursor position and navigation stats
-      local cursor_pos = vim.api.nvim_win_get_cursor(window_id)
-      local stats = navigation_integration.get_navigation_stats(bufnr)
-      vim.notify(string.format("Debug: No commit at cursor line %d, nav stats: %s", 
-        cursor_pos[1], vim.inspect(stats)), vim.log.levels.WARN)
       return {}
     end
   end)
   
   if not success then
-    vim.notify("Debug: Error in cursor context: " .. tostring(result), vim.log.levels.ERROR)
     return {}
   end
   
