@@ -14,12 +14,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.4 Add buffer-local state machine instance management
   - [x] 1.5 Verify all state machine tests pass
 
-- [ ] 2. Implement Command Context Management
-  - [ ] 2.1 Write tests for command context structure and operations
-  - [ ] 2.2 Create command definition framework for single/multi-phase commands
-  - [ ] 2.3 Implement command context storage and retrieval
-  - [ ] 2.4 Add command validation and phase progression logic
-  - [ ] 2.5 Verify all command context tests pass
+- [x] 2. Implement Command Context Management
+  - [x] 2.1 Write tests for command context structure and operations
+  - [x] 2.2 Create command definition framework for single/multi-phase commands
+  - [x] 2.3 Implement command context storage and retrieval
+  - [x] 2.4 Add command validation and phase progression logic
+  - [x] 2.5 Verify all command context tests pass
 
 - [ ] 3. Implement Visual Feedback System
   - [ ] 3.1 Write tests for phase-aware visual indicators
