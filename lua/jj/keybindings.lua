@@ -273,28 +273,77 @@ end
 function M._execute_quick_action(command_name)
   local bufnr = vim.api.nvim_get_current_buf()
   
-  -- Use the new selection integration system
-  local result = selection_integration.execute_command(command_name, bufnr)
+  -- Get command definition to check if it needs selection workflow
+  local command_def = command_execution.get_command(command_name)
   
-  -- Provide user feedback based on result type
-  if result.success then
-    if result.requires_selection then
-      -- Selection workflow started - user feedback handled by selection system
-      vim.notify(result.message or "Selection mode started", vim.log.levels.INFO)
+  if not command_def then
+    vim.notify("Command not found: " .. command_name, vim.log.levels.ERROR)
+    return
+  end
+  
+  -- Check if this command has phases (needs selection workflow)
+  if command_def.quick_action and command_def.quick_action.phases then
+    -- Use the selection integration system for commands with phases
+    local result = selection_integration.execute_command(command_name, bufnr)
+    
+    -- Provide user feedback based on result type
+    if result.success then
+      if result.requires_selection then
+        -- Selection workflow started - user feedback handled by selection system
+        vim.notify(result.message or "Selection mode started", vim.log.levels.INFO)
+      else
+        -- Immediate command executed
+        vim.notify("Command executed successfully", vim.log.levels.INFO)
+        
+        -- Refresh the log window after successful immediate command
+        local log = require("jj.log.init")
+        log.refresh_log()
+      end
     else
-      -- Immediate command executed
-      vim.notify("Command executed successfully", vim.log.levels.INFO)
-      
-      -- Refresh the log window after successful immediate command
-      local log = require("jj.log.init")
-      log.refresh_log()
+      local message = "Command failed: " .. command_name
+      if result.error then
+        message = message .. " (" .. result.error .. ")"
+      end
+      vim.notify(message, vim.log.levels.ERROR)
     end
   else
-    local message = "Command failed: " .. command_name
-    if result.error then
-      message = message .. " (" .. result.error .. ")"
+    -- Execute immediately using the old system for commands without phases
+    local default_commands = require("jj.default_commands")
+    local context = M._get_current_cursor_context()
+    local result = default_commands.execute_with_confirmation(command_name, context)
+    
+    if result.success then
+      vim.notify("Command executed successfully", vim.log.levels.INFO)
+      
+      -- Refresh the log window
+      local log = require("jj.log.init")
+      log.refresh_log()
+    else
+      local message = "Command failed: " .. command_name
+      if result.error then
+        message = message .. " (" .. result.error .. ")"
+      end
+      vim.notify(message, vim.log.levels.ERROR)
     end
-    vim.notify(message, vim.log.levels.ERROR)
+  end
+end
+
+-- Get context from current cursor position
+function M._get_current_cursor_context()
+  local selection_navigation = require("jj.selection_navigation")
+  local bufnr = vim.api.nvim_get_current_buf()
+  local line_number = vim.api.nvim_win_get_cursor(0)[1]
+  
+  local commit_id = selection_navigation.get_commit_id_at_cursor(bufnr, line_number)
+  
+  if commit_id then
+    return {
+      commit_id = commit_id,
+      change_id = commit_id, -- In jj, commit_id and change_id are the same
+      target = commit_id
+    }
+  else
+    return {}
   end
 end
 

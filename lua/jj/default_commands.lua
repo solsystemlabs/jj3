@@ -11,12 +11,9 @@ local DEFAULT_COMMANDS = {
 	new = {
 		quick_action = {
 			cmd = "new",
-			args = { "-m", "{user_input}", "{target}" },
+			args = { "-m", "{user_input}", "{change_id}" },
 			keymap = "n",
 			description = "Create new commit based on commit under cursor, prompting for description",
-			phases = {
-				{ key = "target", prompt = "Select target commit to create new commit after" },
-			},
 		},
 		menu = {
 			keymap = "N",
@@ -142,25 +139,18 @@ local DEFAULT_COMMANDS = {
 	edit = {
 		quick_action = {
 			cmd = "edit",
-			args = { "{target}" },
+			args = { "{change_id}" },
 			keymap = "e",
-			description = "Edit selected change",
-			phases = {
-				{ key = "target", prompt = "Select commit to edit" },
-			},
+			description = "Edit change",
 		},
 	},
 
 	squash = {
 		quick_action = {
 			cmd = "squash",
-			args = { "-r", "{target}" },
+			args = { "-r", "{change_id}" },
 			keymap = "s",
-			description = "Squash selected commit into its parent",
-			confirm = true,
-			phases = {
-				{ key = "target", prompt = "Select commit to squash into its parent" },
-			},
+			description = "Squash into parent",
 		},
 		menu = {
 			keymap = "S",
@@ -188,6 +178,15 @@ local DEFAULT_COMMANDS = {
 					confirm = true,
 				},
 			},
+		},
+	},
+
+	commit = {
+		quick_action = {
+			cmd = "commit",
+			args = { "-m", "{user_input}" },
+			keymap = "c",
+			description = "Commit changes",
 		},
 	},
 
