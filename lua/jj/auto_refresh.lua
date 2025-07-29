@@ -196,7 +196,7 @@ function M.auto_refresh_after_command(command, success, output, window_mock)
     end
   else
     -- In real usage, trigger the actual refresh
-    local log_ok, log = pcall(require, "jj.log")
+    local log_ok, log = pcall(require, "jj.log.init")
     if log_ok then
       success_refresh = log.refresh_log()
     end

@@ -61,13 +61,12 @@ function M.get_command_context()
   local line = vim.api.nvim_get_current_line()
   local basic_info = parser.extract_basic_commit_info(line)
   
-  -- For now, use commit_id for both commit_id and change_id
-  -- TODO: Enhance to extract change_id when comprehensive parsing is available
   local commit_id = basic_info and basic_info.commit_id or "@"
+  local change_id = basic_info and basic_info.change_id or basic_info and basic_info.commit_id or "@"
   
   return {
     commit_id = commit_id,
-    change_id = commit_id, -- Using same ID for now
+    change_id = change_id,
     line_content = line
   }
 end
@@ -122,6 +121,9 @@ function M.execute_command(name, action_type, context)
   
   -- Execute through existing executor
   local result = executor.execute_jj_command(full_command)
+  
+  -- Add the executed command to the result for user feedback
+  result.executed_command = "jj " .. full_command
   
   return result
 end

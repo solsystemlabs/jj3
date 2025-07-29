@@ -13,6 +13,12 @@ M.defaults = {
 		position = "right",
 		size = 50,
 	},
+
+	-- Command customization (user-defined commands)
+	commands = {},
+
+	-- Keybinding overrides for default commands
+	keybinding_overrides = {},
 }
 
 -- Current configuration (starts with defaults)

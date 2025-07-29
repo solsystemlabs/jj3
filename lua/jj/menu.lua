@@ -97,9 +97,18 @@ function M.show_command_menu(command_name)
       
       -- Provide user feedback
       if result.success then
-        vim.notify("Command executed successfully", vim.log.levels.INFO)
+        local message = "Command executed: " .. (result.executed_command or "jj " .. command_name)
+        vim.notify(message, vim.log.levels.INFO)
+        
+        -- Directly refresh the log window after successful command
+        local log = require("jj.log.init")
+        log.refresh_log()
       else
-        vim.notify("Command failed: " .. (result.error or "unknown error"), vim.log.levels.ERROR)
+        local message = "Command failed: " .. (result.executed_command or "jj " .. command_name)
+        if result.error then
+          message = message .. " (" .. result.error .. ")"
+        end
+        vim.notify(message, vim.log.levels.ERROR)
       end
     end
   end)

@@ -47,10 +47,10 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 5.5 Create examples and documentation for user customization
   - [x] 5.6 Verify all customization framework tests pass
 
-- [ ] 6. Integrate with existing plugin architecture
-  - [ ] 6.1 Write integration tests for command system with log display and navigation
-  - [ ] 6.2 Integrate command framework with existing window management system
-  - [ ] 6.3 Connect command execution with auto-refresh system for repository updates
-  - [ ] 6.4 Add command framework initialization to main plugin setup
-  - [ ] 6.5 Ensure command system works with all window configurations (split, floating)
-  - [ ] 6.6 Verify complete integration tests pass and all existing functionality remains intact
+- [x] 6. Integrate with existing plugin architecture
+  - [x] 6.1 Write integration tests for command system with log display and navigation
+  - [x] 6.2 Integrate command framework with existing window management system
+  - [x] 6.3 Connect command execution with auto-refresh system for repository updates
+  - [x] 6.4 Add command framework initialization to main plugin setup
+  - [x] 6.5 Ensure command system works with all window configurations (split, floating)
+  - [x] 6.6 Verify complete integration tests pass and all existing functionality remains intact

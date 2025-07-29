@@ -9,9 +9,25 @@ function M.setup(opts)
 	local config = require("jj.config")
 	config.setup(opts)
 
-	-- Setup auto-refresh system
-	local auto_refresh = require("jj.auto_refresh")
-	auto_refresh.setup_default_auto_refresh()
+	-- Initialize command execution framework
+	local default_commands = require("jj.default_commands")
+	default_commands.register_all_defaults()
+
+	-- Load user customizations if provided
+	local user_config = config.get()
+	if user_config.commands then
+		local command_execution = require("jj.command_execution")
+		command_execution.merge_user_commands(user_config.commands)
+	end
+
+	-- Apply user keybinding overrides if provided
+	if user_config.keybinding_overrides then
+		local keybindings = require("jj.keybindings")
+		keybindings.apply_user_keybinding_overrides(user_config.keybinding_overrides)
+	end
+
+	-- Note: Auto-refresh is handled by individual commands, not globally
+	-- This provides better control over when refresh happens
 
 	-- Load commands
 	local commands = require("jj.commands")

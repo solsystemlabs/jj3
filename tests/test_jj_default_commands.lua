@@ -73,7 +73,7 @@ describe("jj default command set", function()
       end
       
       assert.is_not_nil(after_current_option)
-      assert.is_true(vim.tbl_contains(after_current_option.args, "{commit_id}"))
+      assert.is_true(vim.tbl_contains(after_current_option.args, "{change_id}"))
     end)
   end)
 
@@ -97,34 +97,34 @@ describe("jj default command set", function()
       assert.is_table(menu_options)
       assert.is_true(#menu_options >= 3)
       
-      -- Should have standard rebase, rebase with conflicts, and rebase descendants
+      -- Should have standard rebase, rebase branch, and rebase with descendants
       local has_standard = false
-      local has_conflicts = false
+      local has_branch = false
       local has_descendants = false
       
       for _, option in ipairs(menu_options) do
         local desc = option.desc:lower()
-        if desc:match("rebase onto") then has_standard = true end
-        if desc:match("conflict") then has_conflicts = true end
+        if desc:match("rebase current") then has_standard = true end
+        if desc:match("branch") then has_branch = true end
         if desc:match("descendant") then has_descendants = true end
       end
       
       assert.is_true(has_standard)
-      assert.is_true(has_conflicts)
+      assert.is_true(has_branch)
       assert.is_true(has_descendants)
     end)
     
-    it("should use commit_id parameter in rebase commands", function()
+    it("should use change_id parameter in rebase commands", function()
       local rebase_def = default_commands.get_command_definition("rebase")
       
-      -- Quick action should use commit_id
-      assert.is_true(vim.tbl_contains(rebase_def.quick_action.args, "{commit_id}"))
+      -- Quick action should use change_id
+      assert.is_true(vim.tbl_contains(rebase_def.quick_action.args, "{change_id}"))
       
-      -- Menu options should also use commit_id
+      -- Menu options should also use change_id
       for _, option in ipairs(rebase_def.menu.options) do
         if option.args then
-          local has_commit_id = vim.tbl_contains(option.args, "{commit_id}")
-          assert.is_true(has_commit_id, "Option '" .. option.desc .. "' should have {commit_id} parameter")
+          local has_change_id = vim.tbl_contains(option.args, "{change_id}")
+          assert.is_true(has_change_id, "Option '" .. option.desc .. "' should have {change_id} parameter")
         end
       end
     end)
@@ -164,17 +164,20 @@ describe("jj default command set", function()
       assert.is_table(menu_options)
       assert.is_true(#menu_options >= 2)
       
-      -- Should have basic abandon and abandon with descendants
+      -- Should have basic abandon, retain bookmarks, and restore descendants options
       local has_basic = false
+      local has_bookmarks = false
       local has_descendants = false
       
       for _, option in ipairs(menu_options) do
         local desc = option.desc:lower()
-        if desc:match("abandon current") then has_basic = true end
+        if desc:match("abandon change") and not desc:match("retain") and not desc:match("keep") then has_basic = true end
+        if desc:match("bookmark") then has_bookmarks = true end
         if desc:match("descendant") then has_descendants = true end
       end
       
       assert.is_true(has_basic)
+      assert.is_true(has_bookmarks)
       assert.is_true(has_descendants)
     end)
   end)
@@ -234,17 +237,20 @@ describe("jj default command set", function()
       assert.is_table(menu_options)
       assert.is_true(#menu_options >= 2)
       
-      -- Should have squash into and squash from options
-      local has_into = false
+      -- Should have squash into parent, squash current into selected, and squash from selected options
+      local has_into_parent = false
+      local has_current_into = false
       local has_from = false
       
       for _, option in ipairs(menu_options) do
         local desc = option.desc:lower()
-        if desc:match("squash into") then has_into = true end
-        if desc:match("squash from") or desc:match("squash current") then has_from = true end
+        if desc:match("squash selected into its parent") then has_into_parent = true end
+        if desc:match("squash current working copy into selected") then has_current_into = true end
+        if desc:match("squash selected into current") then has_from = true end
       end
       
-      assert.is_true(has_into)
+      assert.is_true(has_into_parent)
+      assert.is_true(has_current_into)
       assert.is_true(has_from)
     end)
   end)
@@ -328,7 +334,6 @@ describe("jj default command set", function()
       
       -- Check that commands use appropriate parameter types
       local param_usage = {
-        commit_id = false,
         change_id = false,
         user_input = false
       }
@@ -337,7 +342,6 @@ describe("jj default command set", function()
         -- Check quick action
         if command_def.quick_action and command_def.quick_action.args then
           for _, arg in ipairs(command_def.quick_action.args) do
-            if arg == "{commit_id}" then param_usage.commit_id = true end
             if arg == "{change_id}" then param_usage.change_id = true end
             if arg == "{user_input}" then param_usage.user_input = true end
           end
@@ -348,7 +352,6 @@ describe("jj default command set", function()
           for _, option in ipairs(command_def.menu.options) do
             if option.args then
               for _, arg in ipairs(option.args) do
-                if arg == "{commit_id}" then param_usage.commit_id = true end
                 if arg == "{change_id}" then param_usage.change_id = true end
                 if arg == "{user_input}" then param_usage.user_input = true end
               end
@@ -358,7 +361,6 @@ describe("jj default command set", function()
       end
       
       -- Should use all parameter types across the default command set
-      assert.is_true(param_usage.commit_id, "Default commands should use {commit_id}")
       assert.is_true(param_usage.change_id, "Default commands should use {change_id}")
       assert.is_true(param_usage.user_input, "Default commands should use {user_input}")
     end)

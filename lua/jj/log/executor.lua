@@ -27,13 +27,13 @@ function M.execute_jj_command(command)
 			-- Execute the command when refresh completes
 			M.execute_jj_command(command)
 		end)
-		
+
 		if queued then
 			return {
 				success = false,
 				error = "Command queued - refresh in progress",
 				output = nil,
-				queued = true
+				queued = true,
 			}
 		end
 	end
@@ -77,11 +77,8 @@ function M.execute_jj_command(command)
 		}
 	end
 
-	-- Trigger auto-refresh hooks after command completion
-	local ok, auto_refresh = pcall(require, "jj.auto_refresh")
-	if ok then
-		auto_refresh.on_command_complete(command, result.success, result.output or result.error)
-	end
+	-- Note: Auto-refresh is handled by the command execution layer, not the executor
+	-- This allows commands to control when and how refresh happens
 
 	return result
 end
@@ -115,13 +112,13 @@ function M.execute_async(command, callback)
 			-- Execute the command when refresh completes
 			M.execute_async(command, callback)
 		end)
-		
+
 		if queued then
 			callback({
 				success = false,
 				error = "Command queued - refresh in progress",
 				output = nil,
-				queued = true
+				queued = true,
 			})
 			return
 		end

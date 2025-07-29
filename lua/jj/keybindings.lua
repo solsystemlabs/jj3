@@ -33,17 +33,22 @@ function M.register_command_keybindings(buffer_id, command_name)
   if command_def.quick_action and command_def.quick_action.keymap then
     local keymap = M._get_effective_keymap(command_name, "quick_action")
     
-    local quick_action_result = M._register_single_keybinding(
-      buffer_id,
-      keymap,
-      command_name,
-      "quick_action",
-      command_def.quick_action.description
-    )
-    
-    if not quick_action_result.success then
+    if keymap and keymap ~= "" then
+      local quick_action_result = M._register_single_keybinding(
+        buffer_id,
+        keymap,
+        command_name,
+        "quick_action",
+        command_def.quick_action.description
+      )
+      
+      if not quick_action_result.success then
+        success = false
+        table.insert(errors, quick_action_result.error)
+      end
+    else
       success = false
-      table.insert(errors, quick_action_result.error)
+      table.insert(errors, "Invalid keymap for " .. command_name .. " quick_action: " .. tostring(keymap))
     end
   end
   
@@ -51,17 +56,22 @@ function M.register_command_keybindings(buffer_id, command_name)
   if command_def.menu and command_def.menu.keymap then
     local keymap = M._get_effective_keymap(command_name, "menu")
     
-    local menu_result = M._register_single_keybinding(
-      buffer_id,
-      keymap,
-      command_name,
-      "menu",
-      command_def.menu.title or (command_name .. " Options")
-    )
-    
-    if not menu_result.success then
+    if keymap and keymap ~= "" then
+      local menu_result = M._register_single_keybinding(
+        buffer_id,
+        keymap,
+        command_name,
+        "menu",
+        command_def.menu.title or (command_name .. " Options")
+      )
+      
+      if not menu_result.success then
+        success = false
+        table.insert(errors, menu_result.error)
+      end
+    else
       success = false
-      table.insert(errors, menu_result.error)
+      table.insert(errors, "Invalid keymap for " .. command_name .. " menu: " .. tostring(keymap))
     end
   end
   
@@ -180,6 +190,20 @@ end
 
 -- Internal function to register a single keybinding
 function M._register_single_keybinding(buffer_id, keymap, command_name, action_type, description)
+  if not buffer_id or type(buffer_id) ~= "number" then
+    return {
+      success = false,
+      error = "Invalid buffer_id: " .. tostring(buffer_id)
+    }
+  end
+  
+  if not keymap or keymap == "" then
+    return {
+      success = false,
+      error = "Invalid keymap: " .. tostring(keymap)
+    }
+  end
+  
   local success, error_msg = pcall(function()
     local rhs
     
@@ -198,7 +222,6 @@ function M._register_single_keybinding(buffer_id, keymap, command_name, action_t
     end
     
     vim.api.nvim_buf_set_keymap(buffer_id, 'n', keymap, rhs, {
-      buffer = true,
       silent = true,
       noremap = true,
       desc = description
@@ -216,9 +239,10 @@ function M._register_single_keybinding(buffer_id, keymap, command_name, action_t
   if success then
     return { success = true }
   else
+    local error_string = error_msg and tostring(error_msg) or "unknown error"
     return {
       success = false,
-      error = "Failed to register keybinding '" .. keymap .. "': " .. tostring(error_msg)
+      error = "Failed to register keybinding '" .. (keymap or "unknown") .. "': " .. error_string
     }
   end
 end
@@ -251,9 +275,18 @@ function M._execute_quick_action(command_name)
   
   -- Provide user feedback
   if result.success then
-    vim.notify("Command executed successfully", vim.log.levels.INFO)
+    local message = "Command executed: " .. (result.executed_command or "jj " .. command_name)
+    vim.notify(message, vim.log.levels.INFO)
+    
+    -- Directly refresh the log window after successful command
+    local log = require("jj.log.init")
+    log.refresh_log()
   else
-    vim.notify("Command failed: " .. (result.error or "unknown error"), vim.log.levels.ERROR)
+    local message = "Command failed: " .. (result.executed_command or "jj " .. command_name)
+    if result.error then
+      message = message .. " (" .. result.error .. ")"
+    end
+    vim.notify(message, vim.log.levels.ERROR)
   end
 end
 
