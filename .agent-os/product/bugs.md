@@ -4,3 +4,4 @@
 - [ ] Selections don't work. The error "No commit ID found on current line" appears when trying to select, and the Enter key doesn't seem to work.
 - [ ] Quick commands should never show the menu. They should operate on the commit currently under the cursor and execute their command immediately.
 - [ ] The describe command freezes the UI because in the background it tries to open an editor. Describe should only prompt the user for a description using a vim input.
+- [ ] Fix cursor highlighting to highlight entire lines

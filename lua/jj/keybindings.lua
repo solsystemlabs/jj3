@@ -313,7 +313,10 @@ function M._execute_quick_action(command_name)
     local result = default_commands.execute_with_confirmation(command_name, context)
     
     if result.success then
-      vim.notify("Command executed successfully", vim.log.levels.INFO)
+      -- Show specific command that was executed
+      local commit_info = context.change_id or context.commit_id or "@"
+      local success_msg = string.format("jj %s %s executed successfully", command_name, commit_info)
+      vim.notify(success_msg, vim.log.levels.INFO)
       
       -- Refresh the log window
       local log = require("jj.log.init")
@@ -328,23 +331,77 @@ function M._execute_quick_action(command_name)
   end
 end
 
--- Get context from current cursor position
+-- Get context from current cursor position using proper line-to-commit mapping
 function M._get_current_cursor_context()
-  local selection_navigation = require("jj.selection_navigation")
   local bufnr = vim.api.nvim_get_current_buf()
-  local line_number = vim.api.nvim_win_get_cursor(0)[1]
+  local window_id = vim.api.nvim_get_current_win()
   
-  local commit_id = selection_navigation.get_commit_id_at_cursor(bufnr, line_number)
+  vim.notify(string.format("Debug: Getting cursor context for buffer %d, window %d", bufnr, window_id), vim.log.levels.INFO)
   
-  if commit_id then
-    return {
-      commit_id = commit_id,
-      change_id = commit_id, -- In jj, commit_id and change_id are the same
-      target = commit_id
-    }
-  else
+  local success, result = pcall(function()
+    local navigation_integration = require("jj.ui.navigation_integration")
+    
+    -- Debug: Check if navigation is enabled for this buffer
+    local is_nav_enabled = navigation_integration.is_navigation_enabled(bufnr)
+    vim.notify(string.format("Debug: Navigation enabled: %s", tostring(is_nav_enabled)), vim.log.levels.INFO)
+    
+    if not is_nav_enabled then
+      vim.notify("Debug: Navigation not enabled, falling back to text parsing", vim.log.levels.WARN)
+      -- Fall back to old method temporarily
+      local selection_navigation = require("jj.selection_navigation")
+      local line_number = vim.api.nvim_win_get_cursor(0)[1]
+      local commit_id = selection_navigation.get_commit_id_at_cursor(bufnr, line_number)
+      vim.notify(string.format("Debug: Text parsing found commit_id: %s", tostring(commit_id)), vim.log.levels.INFO)
+      if commit_id then
+        return {
+          commit_id = commit_id,
+          change_id = commit_id,
+          target = commit_id
+        }
+      else
+        return {}
+      end
+    end
+    
+    -- Get the commit object at cursor position using the proper navigation system
+    local current_commit = navigation_integration.get_current_commit(bufnr, window_id)
+    vim.notify(string.format("Debug: Navigation integration found commit: %s", 
+      current_commit and current_commit.commit_id or "nil"), vim.log.levels.INFO)
+    
+    -- Debug: Show the full commit object
+    if current_commit then
+      vim.notify(string.format("Debug: Full commit object: %s", vim.inspect(current_commit)), vim.log.levels.INFO)
+    end
+    
+    if current_commit and current_commit.commit_id then
+      -- Use nested commit_data if available, fallback to top-level values
+      local commit_data = current_commit.commit_data or current_commit
+      local commit_id = current_commit.commit_id
+      local change_id = (commit_data.change_id and commit_data.change_id ~= "") 
+                        and commit_data.change_id 
+                        or commit_id
+      
+      return {
+        commit_id = commit_id,
+        change_id = change_id,
+        target = commit_id
+      }
+    else
+      -- Debug: Show cursor position and navigation stats
+      local cursor_pos = vim.api.nvim_win_get_cursor(window_id)
+      local stats = navigation_integration.get_navigation_stats(bufnr)
+      vim.notify(string.format("Debug: No commit at cursor line %d, nav stats: %s", 
+        cursor_pos[1], vim.inspect(stats)), vim.log.levels.WARN)
+      return {}
+    end
+  end)
+  
+  if not success then
+    vim.notify("Debug: Error in cursor context: " .. tostring(result), vim.log.levels.ERROR)
     return {}
   end
+  
+  return result
 end
 
 -- Internal function to show command menu (called by keybinding)
