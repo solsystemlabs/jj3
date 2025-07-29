@@ -3,6 +3,7 @@ local M = {}
 
 -- Import dependencies
 local command_execution = require("jj.command_execution")
+local selection_integration = require("jj.selection_integration")
 local menu = require("jj.menu")
 
 -- Internal keybinding registry to track registered keymaps
@@ -107,7 +108,7 @@ end
 
 -- Register all default keybindings for jj log buffer
 function M.register_all_default_keybindings(buffer_id)
-  local default_commands = { "new", "rebase", "abandon", "edit", "squash" }
+  local default_commands = { "new", "rebase", "abandon", "edit", "squash", "describe_current", "status" }
   return M.register_all_command_keybindings(buffer_id, default_commands)
 end
 
@@ -270,19 +271,26 @@ end
 
 -- Internal function to execute quick action (called by keybinding)
 function M._execute_quick_action(command_name)
-  local context = command_execution.get_command_context()
-  local result = command_execution.execute_command(command_name, "quick_action", context)
+  local bufnr = vim.api.nvim_get_current_buf()
   
-  -- Provide user feedback
+  -- Use the new selection integration system
+  local result = selection_integration.execute_command(command_name, bufnr)
+  
+  -- Provide user feedback based on result type
   if result.success then
-    local message = "Command executed: " .. (result.executed_command or "jj " .. command_name)
-    vim.notify(message, vim.log.levels.INFO)
-    
-    -- Directly refresh the log window after successful command
-    local log = require("jj.log.init")
-    log.refresh_log()
+    if result.requires_selection then
+      -- Selection workflow started - user feedback handled by selection system
+      vim.notify(result.message or "Selection mode started", vim.log.levels.INFO)
+    else
+      -- Immediate command executed
+      vim.notify("Command executed successfully", vim.log.levels.INFO)
+      
+      -- Refresh the log window after successful immediate command
+      local log = require("jj.log.init")
+      log.refresh_log()
+    end
   else
-    local message = "Command failed: " .. (result.executed_command or "jj " .. command_name)
+    local message = "Command failed: " .. command_name
     if result.error then
       message = message .. " (" .. result.error .. ")"
     end

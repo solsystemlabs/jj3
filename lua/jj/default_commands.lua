@@ -4,15 +4,19 @@ local M = {}
 -- Import dependencies
 local executor = require("jj.log.executor")
 local command_execution = require("jj.command_execution")
+local command_context = require("jj.command_context")
 
--- Default command definitions
+-- Default command definitions (enhanced with selection phases)
 local DEFAULT_COMMANDS = {
 	new = {
 		quick_action = {
 			cmd = "new",
-			args = {},
+			args = { "-m", "{user_input}", "{target}" },
 			keymap = "n",
-			description = "Create new commit on current change",
+			description = "Create new commit based on commit under cursor, prompting for description",
+			phases = {
+				{ key = "target", prompt = "Select target commit to create new commit after" },
+			},
 		},
 		menu = {
 			keymap = "N",
@@ -20,21 +24,27 @@ local DEFAULT_COMMANDS = {
 			options = {
 				{
 					key = "1",
-					desc = "New commit (default)",
+					desc = "New commit with multiple parents",
 					cmd = "new",
-					args = {},
+					args = { "-m", "{user_input}", "{multi_target}" },
 				},
 				{
 					key = "2",
-					desc = "New commit with message",
+					desc = "New commit before selected",
 					cmd = "new",
-					args = { "-m", "{user_input}" },
+					args = { "-m", "{user_input}", "--insert-before", "{target}" },
 				},
 				{
 					key = "3",
-					desc = "New commit after current",
+					desc = "New commit after selected",
 					cmd = "new",
-					args = { "--insert-after", "{change_id}" },
+					args = { "-m", "{user_input}", "--insert-after", "{target}" },
+				},
+				{
+					key = "4",
+					desc = "New commit without edit",
+					cmd = "new",
+					args = { "-m", "{user_input}", "--no-edit", "{target}" },
 				},
 			},
 		},
@@ -43,9 +53,12 @@ local DEFAULT_COMMANDS = {
 	rebase = {
 		quick_action = {
 			cmd = "rebase",
-			args = { "-d", "{change_id}" },
+			args = { "-d", "{target}" },
 			keymap = "r",
 			description = "Rebase current change onto selected commit",
+			phases = {
+				{ key = "target", prompt = "Select target commit to rebase onto" },
+			},
 		},
 		menu = {
 			keymap = "R",
@@ -55,19 +68,19 @@ local DEFAULT_COMMANDS = {
 					key = "1",
 					desc = "Rebase current onto selected",
 					cmd = "rebase",
-					args = { "-d", "{change_id}" },
+					args = { "-d", "{target}" },
 				},
 				{
 					key = "2",
 					desc = "Rebase branch onto selected",
 					cmd = "rebase",
-					args = { "-b", "@", "-d", "{change_id}" },
+					args = { "-b", "@", "-d", "{target}" },
 				},
 				{
 					key = "3",
 					desc = "Rebase with descendants",
 					cmd = "rebase",
-					args = { "-s", "@", "-d", "{change_id}" },
+					args = { "-s", "@", "-d", "{target}" },
 				},
 			},
 		},
@@ -76,10 +89,13 @@ local DEFAULT_COMMANDS = {
 	abandon = {
 		quick_action = {
 			cmd = "abandon",
-			args = { "{change_id}" },
+			args = { "{target}" },
 			keymap = "a",
 			description = "Abandon selected change",
 			confirm = true,
+			phases = {
+				{ key = "target", prompt = "Select commit to abandon" },
+			},
 		},
 		menu = {
 			keymap = "A",
@@ -89,21 +105,21 @@ local DEFAULT_COMMANDS = {
 					key = "1",
 					desc = "Abandon change",
 					cmd = "abandon",
-					args = { "{change_id}" },
+					args = { "{target}" },
 					confirm = true,
 				},
 				{
 					key = "2",
 					desc = "Abandon but retain bookmarks",
 					cmd = "abandon",
-					args = { "{change_id}", "--retain-bookmarks" },
+					args = { "{target}", "--retain-bookmarks" },
 					confirm = true,
 				},
 				{
 					key = "3",
 					desc = "Abandon but keep descendants unchanged",
 					cmd = "abandon",
-					args = { "{change_id}", "--restore-descendants" },
+					args = { "{target}", "--restore-descendants" },
 					confirm = true,
 				},
 			},
@@ -113,26 +129,11 @@ local DEFAULT_COMMANDS = {
 	edit = {
 		quick_action = {
 			cmd = "edit",
-			args = { "{change_id}" },
+			args = { "{target}" },
 			keymap = "e",
 			description = "Edit selected change",
-		},
-		menu = {
-			keymap = "E",
-			title = "Edit Options",
-			options = {
-				{
-					key = "1",
-					desc = "Edit commit",
-					cmd = "edit",
-					args = { "{change_id}" },
-				},
-				{
-					key = "2",
-					desc = "Edit commit description",
-					cmd = "describe",
-					args = { "{change_id}", "-m", "{user_input}" },
-				},
+			phases = {
+				{ key = "target", prompt = "Select commit to edit" },
 			},
 		},
 	},
@@ -140,10 +141,13 @@ local DEFAULT_COMMANDS = {
 	squash = {
 		quick_action = {
 			cmd = "squash",
-			args = { "-r", "{change_id}" },
+			args = { "-r", "{target}" },
 			keymap = "s",
 			description = "Squash selected commit into its parent",
 			confirm = true,
+			phases = {
+				{ key = "target", prompt = "Select commit to squash into its parent" },
+			},
 		},
 		menu = {
 			keymap = "S",
@@ -153,22 +157,65 @@ local DEFAULT_COMMANDS = {
 					key = "1",
 					desc = "Squash selected into its parent",
 					cmd = "squash",
-					args = { "-r", "{change_id}" },
+					args = { "-r", "{target}" },
 					confirm = true,
 				},
 				{
 					key = "2",
 					desc = "Squash current working copy into selected",
 					cmd = "squash",
-					args = { "-t", "{change_id}" },
+					args = { "-t", "{target}" },
 					confirm = true,
 				},
 				{
 					key = "3",
 					desc = "Squash selected into current working copy",
 					cmd = "squash",
-					args = { "-f", "{change_id}" },
+					args = { "-f", "{target}" },
 					confirm = true,
+				},
+			},
+		},
+	},
+
+	-- Immediate commands (no selection needed)
+	describe_current = {
+		quick_action = {
+			cmd = "describe",
+			args = {},
+			keymap = "d",
+			description = "Edit description of current commit",
+		},
+		menu = {
+			keymap = "D",
+			title = "Describe Options",
+			options = {
+				{
+					key = "1",
+					desc = "Edit current commit description",
+					cmd = "describe",
+					args = {},
+				},
+			},
+		},
+	},
+
+	status = {
+		quick_action = {
+			cmd = "status",
+			args = {},
+			keymap = "?",
+			description = "Show current repository status",
+		},
+		menu = {
+			keymap = "?",
+			title = "Status Options",
+			options = {
+				{
+					key = "1",
+					desc = "Show repository status",
+					cmd = "status",
+					args = {},
 				},
 			},
 		},
@@ -185,10 +232,16 @@ function M.get_all_default_commands()
 	return DEFAULT_COMMANDS
 end
 
--- Register all default commands in the command execution framework
+-- Register all default commands in both the legacy and new command systems
 function M.register_all_defaults()
+	-- Register in legacy command execution framework
 	for name, definition in pairs(DEFAULT_COMMANDS) do
 		command_execution.register_command(name, definition)
+	end
+
+	-- Register in new command context system with proper phase processing
+	for name, definition in pairs(DEFAULT_COMMANDS) do
+		command_context.register_command(name, definition)
 	end
 end
 
@@ -233,10 +286,28 @@ function M.execute_with_confirmation(command_name, context)
 			table.insert(substituted_args, context.commit_id or "@")
 		elseif arg == "{change_id}" then
 			table.insert(substituted_args, context.change_id or "@")
+		elseif arg == "{target}" then
+			table.insert(substituted_args, context.target or context.commit_id or "@")
+		elseif arg == "{multi_target}" then
+			-- Handle multiple targets for multi-parent commits
+			if context.multi_target and type(context.multi_target) == "table" then
+				for _, target in ipairs(context.multi_target) do
+					table.insert(substituted_args, target)
+				end
+			else
+				-- Fallback to single target
+				table.insert(substituted_args, context.target or context.commit_id or "@")
+			end
 		elseif arg == "{user_input}" then
-			local input = vim.fn.input("Enter value: ")
+			local input = vim.fn.input("Commit description: ")
 			if input ~= "" then
 				table.insert(substituted_args, input)
+			else
+				-- If no description provided, don't include -m flag
+				-- Skip both this arg and the previous -m arg
+				if substituted_args[#substituted_args] == "-m" then
+					table.remove(substituted_args)
+				end
 			end
 		else
 			table.insert(substituted_args, arg)

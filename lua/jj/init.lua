@@ -9,6 +9,10 @@ function M.setup(opts)
 	local config = require("jj.config")
 	config.setup(opts)
 
+	-- Initialize selection integration system (must be done first)
+	local selection_integration = require("jj.selection_integration")
+	selection_integration.setup()
+
 	-- Initialize command execution framework
 	local default_commands = require("jj.default_commands")
 	default_commands.register_all_defaults()
