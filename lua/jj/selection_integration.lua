@@ -142,7 +142,7 @@ function M._complete_workflow(bufnr)
 	end
 
 	-- Build command with selections
-	local success, command_string = M._build_command_string(workflow.command_def, context.selections)
+	local success, command_string = M._build_command_string(workflow.command_def, context.selections, context)
 
 	if not success then
 		vim.notify("Failed to build command: " .. command_string, vim.log.levels.ERROR)
@@ -177,26 +177,31 @@ function M._complete_workflow(bufnr)
 	machine:handle_event(types.Events.COMMAND_COMPLETED, {})
 end
 
--- Build command string with selections substituted
-function M._build_command_string(command_def, selections)
+-- Build command string with selections substituted and final placeholders resolved
+function M._build_command_string(command_def, selections, context)
 	local quick_action = command_def.quick_action
 	if not quick_action then
 		return false, "Command definition missing quick_action"
 	end
 
 	local args = quick_action.args or {}
-	local substituted_args = command_context.substitute_selections(args, selections)
+	
+	-- Phase 1: Substitute only selection-based placeholders
+	local selection_substituted_args = command_context.substitute_selections(args, selections)
+	
+	-- Phase 2: Substitute all remaining placeholders (user_input, commit_id, etc.)
+	local final_args = command_context.substitute_final_placeholders(selection_substituted_args, context or {})
 
-	-- Check for unsubstituted templates
-	for _, arg in ipairs(substituted_args) do
+	-- Check for any remaining unsubstituted templates
+	for _, arg in ipairs(final_args) do
 		if type(arg) == "string" and arg:match("{[^}]+}") then
-			return false, "Missing selection for template: " .. arg
+			return false, "Missing substitution for template: " .. arg
 		end
 	end
 
 	-- Build final command
 	local command_parts = { quick_action.cmd }
-	vim.list_extend(command_parts, substituted_args)
+	vim.list_extend(command_parts, final_args)
 
 	return true, table.concat(command_parts, " ")
 end

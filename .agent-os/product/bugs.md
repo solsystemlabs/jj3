@@ -5,3 +5,4 @@
 - [ ] Quick commands should never show the menu. They should operate on the commit currently under the cursor and execute their command immediately.
 - [ ] The describe command freezes the UI because in the background it tries to open an editor. Describe should only prompt the user for a description using a vim input.
 - [ ] Fix cursor highlighting to highlight entire lines
+- [ ] Make log window always appear on the right-most side of neovim

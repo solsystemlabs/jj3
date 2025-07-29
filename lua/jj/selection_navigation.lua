@@ -18,24 +18,45 @@ local COMMIT_ID_PATTERNS = {
 	"^%s*([a-f0-9]+):",
 }
 
--- Extract commit ID from the line at cursor position
--- TODO: This is not correct. We should not be extracting commit ids, we should be referring to our internal commit object tied to rendered commits.
+-- Extract commit ID from the line at cursor position using proper line-to-commit mapping
 function M.get_commit_id_at_cursor(bufnr, line_number)
-	local lines = vim.api.nvim_buf_get_lines(bufnr, line_number - 1, line_number, false)
-	if #lines == 0 then
+	-- Use the navigation integration system to get commit at specific line
+	local navigation_integration = require("jj.ui.navigation_integration")
+	
+	-- Check if navigation is enabled for this buffer
+	if not navigation_integration.is_navigation_enabled(bufnr) then
+		-- Fall back to text parsing if navigation integration isn't available
+		local lines = vim.api.nvim_buf_get_lines(bufnr, line_number - 1, line_number, false)
+		if #lines == 0 then
+			return nil
+		end
+
+		local line = lines[1]
+
+		-- Try each pattern to extract commit ID
+		for _, pattern in ipairs(COMMIT_ID_PATTERNS) do
+			local commit_id = line:match(pattern)
+			if commit_id and #commit_id >= 6 then -- Reasonable commit ID length
+				return commit_id
+			end
+		end
+
 		return nil
 	end
-
-	local line = lines[1]
-
-	-- Try each pattern to extract commit ID
-	for _, pattern in ipairs(COMMIT_ID_PATTERNS) do
-		local commit_id = line:match(pattern)
-		if commit_id and #commit_id >= 6 then -- Reasonable commit ID length
-			return commit_id
+	
+	-- Get navigation boundaries to find commit at specific line
+	local boundaries = navigation_integration.get_navigation_boundaries(bufnr)
+	if not boundaries then
+		return nil
+	end
+	
+	-- Find which commit boundary contains the given line number
+	for _, boundary in ipairs(boundaries) do
+		if line_number >= boundary.start_line and line_number <= boundary.end_line then
+			return boundary.commit_id
 		end
 	end
-
+	
 	return nil
 end
 
