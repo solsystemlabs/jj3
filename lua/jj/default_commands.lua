@@ -316,10 +316,15 @@ function M.execute_with_confirmation(command_name, context)
 			if input ~= "" then
 				table.insert(substituted_args, input)
 			else
-				-- If no description provided, don't include -m flag
-				-- Skip both this arg and the previous -m arg
-				if substituted_args[#substituted_args] == "-m" then
-					table.remove(substituted_args)
+				-- For describe command, allow empty descriptions
+				if command_def.quick_action.cmd == "describe" then
+					table.insert(substituted_args, "")
+				else
+					-- For other commands, don't include -m flag if no description
+					-- Skip both this arg and the previous -m arg
+					if substituted_args[#substituted_args] == "-m" then
+						table.remove(substituted_args)
+					end
 				end
 			end
 		else
@@ -330,7 +335,12 @@ function M.execute_with_confirmation(command_name, context)
 	-- Build command string
 	local command_parts = { command_def.quick_action.cmd }
 	for _, arg in ipairs(substituted_args) do
-		table.insert(command_parts, arg)
+		-- Quote arguments that contain spaces or are empty strings
+		if arg == "" or string.match(arg, "%s") then
+			table.insert(command_parts, '"' .. arg .. '"')
+		else
+			table.insert(command_parts, arg)
+		end
 	end
 	local full_command = table.concat(command_parts, " ")
 

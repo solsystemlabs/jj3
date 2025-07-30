@@ -362,6 +362,42 @@ describe("jj default command set", function()
       assert.is_true(vim.tbl_contains(first_option.args, "-m"))
       assert.is_true(vim.tbl_contains(first_option.args, "{user_input}"))
     end)
+    
+    it("should handle empty input for describe command", function()
+      -- Mock vim.fn.input to return empty string
+      vim.fn.input = function(prompt)
+        return ""
+      end
+      
+      local executed_command = nil
+      mock_executor.execute_jj_command = function(cmd)
+        executed_command = cmd
+        return { success = true, output = "description cleared" }
+      end
+      
+      local result = default_commands.execute_with_confirmation("describe_current", {})
+      
+      assert.is_true(result.success)
+      assert.matches("describe %-m \"\"", executed_command)
+    end)
+    
+    it("should handle non-empty input for describe command", function()
+      -- Mock vim.fn.input to return a message
+      vim.fn.input = function(prompt)
+        return "New commit description"
+      end
+      
+      local executed_command = nil
+      mock_executor.execute_jj_command = function(cmd)
+        executed_command = cmd
+        return { success = true, output = "description updated" }
+      end
+      
+      local result = default_commands.execute_with_confirmation("describe_current", {})
+      
+      assert.is_true(result.success)
+      assert.matches('describe %-m "New commit description"', executed_command)
+    end)
   end)
 
   describe("parameter substitution integration", function()
