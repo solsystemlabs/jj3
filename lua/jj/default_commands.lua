@@ -194,7 +194,7 @@ local DEFAULT_COMMANDS = {
 	describe_current = {
 		quick_action = {
 			cmd = "describe",
-			args = {},
+			args = { "-m", "{user_input}" },
 			keymap = "d",
 			description = "Edit description of current commit",
 		},
@@ -206,7 +206,7 @@ local DEFAULT_COMMANDS = {
 					key = "1",
 					desc = "Edit current commit description",
 					cmd = "describe",
-					args = {},
+					args = { "-m", "{user_input}" },
 				},
 			},
 		},

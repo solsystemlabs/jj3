@@ -328,6 +328,42 @@ describe("jj default command set", function()
     end)
   end)
 
+  describe("describe commands", function()
+    it("should define describe_current command with quick action and menu", function()
+      local describe_def = default_commands.get_command_definition("describe_current")
+      
+      assert.is_not_nil(describe_def)
+      assert.is_not_nil(describe_def.quick_action)
+      assert.is_not_nil(describe_def.menu)
+      
+      assert.are.equal("describe", describe_def.quick_action.cmd)
+      assert.are.equal("d", describe_def.quick_action.keymap)
+      assert.are.equal("D", describe_def.menu.keymap)
+    end)
+    
+    it("should use -m flag with user_input for describe_current command", function()
+      local describe_def = default_commands.get_command_definition("describe_current")
+      
+      assert.is_not_nil(describe_def.quick_action.args)
+      assert.is_true(vim.tbl_contains(describe_def.quick_action.args, "-m"))
+      assert.is_true(vim.tbl_contains(describe_def.quick_action.args, "{user_input}"))
+    end)
+    
+    it("should have menu option with message prompt for describe", function()
+      local describe_def = default_commands.get_command_definition("describe_current")
+      local menu_options = describe_def.menu.options
+      
+      assert.is_table(menu_options)
+      assert.is_true(#menu_options >= 1)
+      
+      -- First option should use -m flag with user_input
+      local first_option = menu_options[1]
+      assert.is_not_nil(first_option.args)
+      assert.is_true(vim.tbl_contains(first_option.args, "-m"))
+      assert.is_true(vim.tbl_contains(first_option.args, "{user_input}"))
+    end)
+  end)
+
   describe("parameter substitution integration", function()
     it("should support all parameter types in default commands", function()
       local commands = default_commands.get_all_default_commands()
