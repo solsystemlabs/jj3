@@ -213,13 +213,13 @@ function M.close_log_window()
 		if log_buffer_id then
 			navigation_integration.cleanup_navigation_for_buffer(log_buffer_id)
 		end
-		
+
 		-- Reset refresh state when window is closed
 		local ok, refresh = pcall(require, "jj.refresh")
 		if ok then
 			refresh.reset_refresh_state()
 		end
-		
+
 		vim.api.nvim_win_close(log_window_id, true)
 		log_window_id = nil
 		return true
@@ -376,16 +376,15 @@ function M.render_log_content(raw_colored_output, commits)
 	if not buffer_id then
 		return false
 	end
-	
 
 	-- Use renderer to display content
 	local result = renderer.render_to_buffer(buffer_id, raw_colored_output)
-	
+
 	-- Setup navigation if commits are provided and rendering succeeded
 	if result and commits and #commits > 0 then
 		navigation_integration.setup_navigation_integration(buffer_id, commits, true)
 	end
-	
+
 	return result ~= nil
 end
 
@@ -459,13 +458,13 @@ function M.cleanup()
 	if log_buffer_id then
 		navigation_integration.cleanup_navigation_for_buffer(log_buffer_id)
 	end
-	
+
 	-- Reset refresh state on cleanup
 	local ok, refresh = pcall(require, "jj.refresh")
 	if ok then
 		refresh.reset_refresh_state()
 	end
-	
+
 	M.close_log_window()
 	log_buffer_id = nil
 	log_window_id = nil

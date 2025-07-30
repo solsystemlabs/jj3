@@ -31,6 +31,11 @@ function M._extract_phases_from_command(command_def)
 		return command_def.quick_action.phases
 	end
 
+	-- Check for phases at the top level (for menu-generated command definitions)
+	if command_def.phases then
+		return command_def.phases
+	end
+
 	-- Check if we can infer phases from args that use selection templates
 	if command_def.quick_action and command_def.quick_action.args then
 		local required_selections = M.extract_required_selections(command_def.quick_action.args)
@@ -120,7 +125,6 @@ end
 
 -- Substitute all remaining placeholders after selections are complete (phase 2)
 function M.substitute_final_placeholders(args, context)
-	vim.notify("DEBUG: substitute_final_placeholders called", vim.log.levels.WARN)
 	local substituted = {}
 
 	for _, arg in ipairs(args) do
@@ -129,7 +133,6 @@ function M.substitute_final_placeholders(args, context)
 
 			-- Handle user input prompt
 			if substituted_arg:match("{user_input}") then
-				vim.notify("DEBUG: About to prompt for user input", vim.log.levels.WARN)
 				local input = vim.fn.input("Commit description: ")
 				if input and input ~= "" then
 					substituted_arg = substituted_arg:gsub("{user_input}", input)

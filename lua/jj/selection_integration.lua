@@ -166,6 +166,10 @@ function M._complete_workflow(bufnr)
 	-- Notify user
 	if result.success then
 		vim.notify("Command executed successfully", vim.log.levels.INFO)
+		
+		-- Refresh the log window after successful command execution
+		local log = require("jj.log.init")
+		log.refresh_log()
 	else
 		vim.notify("Command failed: " .. (result.error or "Unknown error"), vim.log.levels.ERROR)
 	end

@@ -68,19 +68,19 @@ local transitions = {
 -- State entry callbacks
 local state_entry_callbacks = {
   [types.States.SELECTING_SOURCE] = function(machine, event_data)
-    if event_data.command_def then
+    if event_data.command_def and not machine.command_context then
       machine:_initialize_command_context(event_data.command_def)
     end
   end,
   
   [types.States.SELECTING_TARGET] = function(machine, event_data)
-    if not machine.command_context and event_data.command_def then
+    if event_data.command_def and not machine.command_context then
       machine:_initialize_command_context(event_data.command_def)
     end
   end,
   
   [types.States.SELECTING_MULTIPLE] = function(machine, event_data)
-    if event_data.command_def then
+    if event_data.command_def and not machine.command_context then
       machine:_initialize_command_context(event_data.command_def)
     end
   end,
