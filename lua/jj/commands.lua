@@ -2,13 +2,12 @@
 local M = {}
 
 -- Lazy load modules for better startup performance
-local log = nil
+local log = require("jj.log.init")
 local config = nil
 
 -- Helper function to ensure modules are loaded
 local function ensure_modules_loaded()
 	if not log then
-		log = require("jj.log.init")
 		-- Set up log orchestration on first load
 		if config then
 			local user_config = config.get()
@@ -26,26 +25,17 @@ local function handle_jj_command(opts)
 	local args = opts.args or ""
 
 	if args == "" then
-		-- Default behavior: toggle log window
 		log.toggle_log()
 	elseif args == "show" then
-		-- Explicitly show log
 		log.show_log()
 	elseif args == "close" then
-		-- Close log window
 		log.close_log()
 	elseif args == "refresh" then
-		-- Refresh log content
 		log.refresh_log()
 	elseif args == "toggle" then
-		-- Toggle log window
 		log.toggle_log()
 	elseif args == "focus" then
-		-- Focus log window
 		log.focus_log()
-	elseif args == "clear" then
-		-- Clear log content
-		log.clear_log()
 	elseif args == "status" then
 		-- Show status information
 		local status = log.get_status()
@@ -70,7 +60,6 @@ jj.nvim commands:
   :JJ refresh      - Refresh log content
   :JJ toggle       - Toggle log window
   :JJ focus        - Focus log window
-  :JJ clear        - Clear log content
   :JJ status       - Show status information
   :JJ --<options>  - Show log with custom jj options
     ]]
@@ -175,7 +164,6 @@ function M.setup()
 				"refresh",
 				"toggle",
 				"focus",
-				"clear",
 				"status",
 				"--limit",
 				"--revisions",
