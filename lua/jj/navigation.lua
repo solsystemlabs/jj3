@@ -5,6 +5,20 @@ local M = {}
 local HIGHLIGHT_NAMESPACE = vim.api.nvim_create_namespace("jj_commit_navigation")
 local HIGHLIGHT_GROUP = "JJCommitBlock"
 
+-- Initialize highlight group for commit blocks
+local function setup_highlight_groups()
+  -- Define JJCommitBlock highlight group with background color for full-width highlighting
+  vim.api.nvim_set_hl(0, "JJCommitBlock", {
+    bg = "#3d4f5c",    -- Dark blue-gray background
+    fg = "#ffffff",    -- White text for contrast
+    ctermbg = 8,       -- Dark gray for terminal
+    ctermfg = 15       -- White for terminal
+  })
+end
+
+-- Call setup on module load
+setup_highlight_groups()
+
 -- Create a commit block data structure
 function M.create_commit_block(commit_id, change_id, start_line, end_line, commit_data)
   -- Validate inputs
@@ -264,19 +278,22 @@ function M.highlight_commit_block(buffer_id, commit_block)
   -- Clear any existing highlights first
   M.clear_commit_highlights(buffer_id)
   
-  -- Highlight all lines in the commit block
+  -- Highlight all lines in the commit block with full window width
   for line_num = commit_block.start_line, commit_block.end_line do
     -- Convert to 0-indexed for vim.api
     local zero_indexed_line = line_num - 1
     
-    -- Highlight the entire line (col_start=0, col_end=-1 means entire line)
-    vim.api.nvim_buf_add_highlight(
+    -- Use extmark with hl_eol to highlight entire line width (no end_col needed)
+    vim.api.nvim_buf_set_extmark(
       buffer_id,
       HIGHLIGHT_NAMESPACE,
-      HIGHLIGHT_GROUP,
       zero_indexed_line,
       0,
-      -1
+      {
+        hl_group = HIGHLIGHT_GROUP,
+        hl_eol = true,  -- This extends highlighting to end of window
+        line_hl_group = HIGHLIGHT_GROUP  -- This highlights the entire line
+      }
     )
   end
   

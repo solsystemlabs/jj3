@@ -187,13 +187,16 @@ function M.open_log_window(config)
 		relativenumber = false,
 		signcolumn = "no",
 		foldcolumn = "0",
-		cursorline = false,
+		cursorline = true, -- Enable full-width cursor line highlighting
 		filetype = "jj",
 	}
 
 	for option, value in pairs(window_options) do
 		vim.api.nvim_win_set_option(window_id, option, value)
 	end
+
+	-- Configure cursor line highlighting specifically for jj buffers
+	M.setup_cursor_line_highlighting(window_id, buffer_id)
 
 	-- Store window ID
 	log_window_id = window_id
@@ -212,6 +215,8 @@ function M.close_log_window()
 		-- Clean up navigation for the buffer before closing window
 		if log_buffer_id then
 			navigation_integration.cleanup_navigation_for_buffer(log_buffer_id)
+			-- Clean up cursor line highlighting
+			M.cleanup_cursor_line_highlighting(log_buffer_id)
 		end
 
 		-- Reset refresh state when window is closed
@@ -468,6 +473,104 @@ function M.cleanup()
 	M.close_log_window()
 	log_buffer_id = nil
 	log_window_id = nil
+end
+
+-- Setup cursor line highlighting for jj log buffers
+function M.setup_cursor_line_highlighting(window_id, buffer_id)
+	if not window_id or not buffer_id then
+		return false
+	end
+
+	-- Ensure CursorLine highlight group exists with appropriate styling
+	local ok, _ = pcall(function()
+		-- Get current CursorLine highlight or create default
+		local cursorline_hl = vim.api.nvim_get_hl_by_name("CursorLine", true)
+		
+		-- If CursorLine doesn't have background, set a subtle one
+		if not cursorline_hl.background then
+			vim.api.nvim_set_hl(0, "CursorLine", {
+				bg = "#2d3748", -- Subtle dark background
+				ctermbg = 8     -- Fallback for terminal
+			})
+		end
+	end)
+
+	-- Set up autocmd to ensure cursor line highlighting persists
+	local autocmd_group = vim.api.nvim_create_augroup("JJCursorLineHighlighting", { clear = false })
+	
+	vim.api.nvim_create_autocmd({"BufEnter", "WinEnter"}, {
+		group = autocmd_group,
+		buffer = buffer_id,
+		callback = function()
+			-- Re-enable cursorline when entering jj buffer
+			if vim.api.nvim_win_is_valid(window_id) then
+				vim.api.nvim_win_set_option(window_id, "cursorline", true)
+			end
+		end
+	})
+
+	return true
+end
+
+-- Apply full-width highlighting to specific lines
+function M.highlight_lines_full_width(buffer_id, lines, highlight_group)
+	if not buffer_id or not lines or #lines == 0 then
+		return false
+	end
+
+	highlight_group = highlight_group or "Visual"
+	local namespace = vim.api.nvim_create_namespace("jj_full_width_highlighting")
+
+	-- Clear any existing highlights in this namespace
+	vim.api.nvim_buf_clear_namespace(buffer_id, namespace, 0, -1)
+
+	-- Apply full-width highlighting to each line
+	for _, line_num in ipairs(lines) do
+		-- Convert to 0-indexed if needed
+		local zero_indexed_line = (line_num > 0) and (line_num - 1) or line_num
+		
+		vim.api.nvim_buf_add_highlight(
+			buffer_id,
+			namespace,
+			highlight_group,
+			zero_indexed_line,
+			0,  -- Start at beginning of line
+			-1  -- Extend to end of line (full width)
+		)
+	end
+
+	return true
+end
+
+-- Clear full-width highlighting from buffer
+function M.clear_full_width_highlighting(buffer_id)
+	if not buffer_id then
+		return false
+	end
+
+	local namespace = vim.api.nvim_create_namespace("jj_full_width_highlighting")
+	vim.api.nvim_buf_clear_namespace(buffer_id, namespace, 0, -1)
+	return true
+end
+
+-- Cleanup cursor line highlighting configuration
+function M.cleanup_cursor_line_highlighting(buffer_id)
+	if not buffer_id then
+		return false
+	end
+
+	-- Clear the autocmd group for cursor line highlighting
+	local ok, _ = pcall(function()
+		vim.api.nvim_clear_autocmds({
+			group = "JJCursorLineHighlighting",
+			buffer = buffer_id
+		})
+	end)
+
+	-- Clear any full-width highlighting
+	M.clear_full_width_highlighting(buffer_id)
+
+	return true
 end
 
 return M

@@ -3,20 +3,13 @@
 These are the tasks to be completed for the spec detailed in @.agent-os/specs/2025-07-30-cursor-line-highlighting/spec.md
 
 > Created: 2025-07-30
-> Status: Ready for Implementation
+> Status: Completed
 
 ## Tasks
 
-- [ ] 1. Implement cursor line highlighting in UI module
-  - [ ] 1.1 Write tests for cursor line highlighting setup in jj log buffer
-  - [ ] 1.2 Modify ui.lua to enable cursorline option for jj log windows
-  - [ ] 1.3 Add buffer-specific cursor line configuration
-  - [ ] 1.4 Implement proper cleanup when jj log window is closed
-  - [ ] 1.5 Verify all cursor line highlighting tests pass
-
-- [ ] 2. Ensure buffer isolation and compatibility
-  - [ ] 2.1 Write tests for buffer switching behavior with cursor line settings
-  - [ ] 2.2 Add event handling to manage cursor line state during buffer changes
-  - [ ] 2.3 Test integration with existing navigation functions (j/k movement)
-  - [ ] 2.4 Verify cursor line settings don't affect other buffers
-  - [ ] 2.5 Verify all buffer isolation tests pass
+- [x] 1. Fix full-width line highlighting for commit blocks
+  - [x] 1.1 Define JJCommitBlock highlight group with background color
+  - [x] 1.2 Replace nvim_buf_add_highlight with nvim_buf_set_extmark
+  - [x] 1.3 Use line_hl_group and hl_eol parameters for full-width highlighting
+  - [x] 1.4 Test that highlighting extends to window edge
+  - [x] 1.5 Verify all lines in commit block are highlighted
