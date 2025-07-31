@@ -111,19 +111,24 @@ local function calculate_window_config(config)
 		-- Use global positioning for floating windows
 		local position = calculate_floating_position(config.width, config.height)
 		
-		-- Floating window configuration - no borders or title for full edge-to-edge display
+		-- Floating window configuration with configurable borders and title
 		win_config = {
 			relative = "editor",  -- Always position relative to entire editor
 			width = position.width,
 			height = position.height,
 			row = position.row,
 			col = position.col,
-			border = "none",      -- No border for edge-to-edge display
+			border = config.border or "none",
 			style = "minimal",
 			focusable = config.focusable,
 			zindex = config.zindex,
-			-- No title for clean appearance
 		}
+		
+		-- Add title if configured
+		if config.title then
+			win_config.title = config.title
+			win_config.title_pos = config.title_pos or "center"
+		end
 	else
 		-- Split window - configuration handled by vim commands
 		win_config = {
@@ -199,6 +204,20 @@ function M.open_log_window(user_config)
 		-- Apply other window config options
 		if user_global_config.window.size then
 			merged_config.width = user_global_config.window.size
+		end
+		
+		-- Apply border configuration
+		if user_global_config.window.border then
+			merged_config.border = user_global_config.window.border
+		end
+		
+		-- Apply title configuration
+		if user_global_config.window.title ~= nil then
+			merged_config.title = user_global_config.window.title
+		end
+		
+		if user_global_config.window.title_pos then
+			merged_config.title_pos = user_global_config.window.title_pos
 		end
 	end
 	

@@ -19,7 +19,7 @@ describe("Log window positioning demonstration", function()
     assert.is_not_nil(window_id)
     assert.is_true(window.is_log_window_open())
     
-    print("✓ Default floating window positioning works (borderless, full height)")
+    print("✓ Default floating window positioning works (left border, full height)")
   end)
 
   it("should demonstrate configurable split window behavior", function()
@@ -106,5 +106,53 @@ describe("Log window positioning demonstration", function()
     assert.is_not_nil(window_id)
     
     print("✓ Configuration override behavior works")
+  end)
+
+  it("should demonstrate configurable border options", function()
+    -- Test different border configurations
+    
+    -- No borders
+    config.setup({
+      window = {
+        window_type = "floating",
+        border = "none"
+      }
+    })
+    
+    local window_id1 = window.open_log_window({
+      width = 60
+    })
+    assert.is_not_nil(window_id1)
+    window.close_log_window()
+    
+    -- Full single border
+    config.setup({
+      window = {
+        window_type = "floating",
+        border = "single",
+        title = "JJ Log"
+      }
+    })
+    
+    local window_id2 = window.open_log_window({
+      width = 60
+    })
+    assert.is_not_nil(window_id2)
+    window.close_log_window()
+    
+    -- Custom partial border (left and bottom)
+    config.setup({
+      window = {
+        window_type = "floating",
+        border = {"", "", "", "│", "", "─", "", ""}
+      }
+    })
+    
+    local window_id3 = window.open_log_window({
+      width = 60
+    })
+    assert.is_not_nil(window_id3)
+    
+    print("✓ Configurable border options work (none, single, custom)")
   end)
 end)

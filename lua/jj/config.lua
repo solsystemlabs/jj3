@@ -13,6 +13,9 @@ M.defaults = {
 		position = "right",
 		size = 50,
 		window_type = "floating", -- "floating" or "split"
+		border = {"", "", "", "│", "", "", "", ""}, -- Default: left border only
+		title = nil, -- No title by default
+		title_pos = "center",
 	},
 
 	-- Command customization (user-defined commands)
