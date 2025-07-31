@@ -168,24 +168,12 @@ local DEFAULT_COMMANDS = {
 			options = {
 				{
 					key = "1",
-					desc = "Squash selected into its parent",
+					desc = "Squash into selected commit",
 					cmd = "squash",
-					args = { "-r", "{target}" },
-					confirm = true,
-				},
-				{
-					key = "2",
-					desc = "Squash current working copy into selected",
-					cmd = "squash",
-					args = { "-t", "{target}" },
-					confirm = true,
-				},
-				{
-					key = "3",
-					desc = "Squash selected into current working copy",
-					cmd = "squash",
-					args = { "-f", "{target}" },
-					confirm = true,
+					args = { "-r", "{change_id}", "-d", "{target}" },
+					phases = {
+						{ key = "target", prompt = "Select commit to squash into" },
+					},
 				},
 			},
 		},
