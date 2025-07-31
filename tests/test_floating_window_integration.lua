@@ -31,9 +31,9 @@ describe("Floating window positioning integration", function()
       local expected_col = 120 - 80 - 2
       assert.are.equal(38, expected_col)
       
-      -- Window should use full height: lines(30) - 2 = 28
-      local expected_height = 30 - 2
-      assert.are.equal(28, expected_height)
+      -- Window should use absolute full height: lines(30)
+      local expected_height = 30
+      assert.are.equal(30, expected_height)
     end)
 
     it("should handle small terminal dimensions correctly", function()
@@ -52,9 +52,9 @@ describe("Floating window positioning integration", function()
       local expected_col = 80 - 60 - 2
       assert.are.equal(18, expected_col)
       
-      -- Should use full height: lines(20) - 2 = 18
-      local expected_height = 20 - 2
-      assert.are.equal(18, expected_height)
+      -- Should use absolute full height: lines(20)
+      local expected_height = 20
+      assert.are.equal(20, expected_height)
     end)
 
     it("should handle window larger than terminal width", function()
@@ -69,9 +69,9 @@ describe("Floating window positioning integration", function()
       
       assert.is_not_nil(window_id)
       -- Window should be positioned at column 0 when it's too wide
-      -- Height should still be full: lines(30) - 2 = 28
-      local expected_height = 30 - 2
-      assert.are.equal(28, expected_height)
+      -- Height should still be absolute full: lines(30)
+      local expected_height = 30
+      assert.are.equal(30, expected_height)
     end)
 
     it("should always use full height regardless of terminal size", function()
@@ -85,9 +85,9 @@ describe("Floating window positioning integration", function()
       })
       
       assert.is_not_nil(window_id)
-      -- Should use available height: lines(15) - 2 = 13
-      local expected_height = 15 - 2
-      assert.are.equal(13, expected_height)
+      -- Should use absolute full height: lines(15)
+      local expected_height = 15
+      assert.are.equal(15, expected_height)
     end)
   end)
 

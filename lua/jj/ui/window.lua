@@ -80,12 +80,12 @@ local function calculate_floating_position(width, height)
 	local total_width = vim.o.columns
 	local total_height = vim.o.lines
 	
-	-- Use full height minus space for command line and status line
-	local full_height = total_height - 2  -- Reserve 2 lines for command/status
+	-- Use absolutely full height - no borders means we can use entire space
+	local full_height = total_height
 	
 	-- Position at the right edge with some padding
 	local col = total_width - width - 2  -- 2 columns padding from right edge
-	local row = 0  -- Start from top
+	local row = 0  -- Start from absolute top
 	
 	-- Handle edge cases where window would exceed bounds
 	if col < 0 then col = 0 end
@@ -111,19 +111,18 @@ local function calculate_window_config(config)
 		-- Use global positioning for floating windows
 		local position = calculate_floating_position(config.width, config.height)
 		
-		-- Floating window configuration
+		-- Floating window configuration - no borders or title for full edge-to-edge display
 		win_config = {
 			relative = "editor",  -- Always position relative to entire editor
 			width = position.width,
 			height = position.height,
 			row = position.row,
 			col = position.col,
-			border = config.border,
+			border = "none",      -- No border for edge-to-edge display
 			style = "minimal",
 			focusable = config.focusable,
 			zindex = config.zindex,
-			title = config.title,
-			title_pos = config.title_pos,
+			-- No title for clean appearance
 		}
 	else
 		-- Split window - configuration handled by vim commands

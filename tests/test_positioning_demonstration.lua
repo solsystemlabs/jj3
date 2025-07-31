@@ -19,7 +19,7 @@ describe("Log window positioning demonstration", function()
     assert.is_not_nil(window_id)
     assert.is_true(window.is_log_window_open())
     
-    print("✓ Default floating window positioning works (full height)")
+    print("✓ Default floating window positioning works (borderless, full height)")
   end)
 
   it("should demonstrate configurable split window behavior", function()
