@@ -81,7 +81,7 @@ local DEFAULT_COMMANDS = {
 					key = "1",
 					desc = "Rebase current onto selected",
 					cmd = "rebase",
-					args = { "-d", "{target}" },
+					args = { "-r", "{change_id}", "-d", "{target}" },
 					phases = {
 						{ key = "target", prompt = "Select target commit to rebase onto" },
 					},

@@ -84,9 +84,6 @@ function M.show_log(config)
 		return false
 	end
 
-	-- Show loading message
-	show_info_message("Loading jj log...")
-
 	-- Get colored log output for rendering
 	local colored_output, error_type, error_details = get_colored_log_output()
 	if not colored_output then
@@ -124,9 +121,6 @@ function M.show_log(config)
 	-- Store current log data for potential refresh
 	current_log_data = colored_output
 
-	-- Show success message
-	show_info_message("jj log displayed successfully")
-
 	return true
 end
 
@@ -136,10 +130,7 @@ function M.toggle_log(config)
 
 	if window.is_log_window_open() then
 		-- Close window
-		local closed = window.close_log_window()
-		if closed then
-			show_info_message("jj log window closed")
-		end
+		window.close_log_window()
 		return false
 	else
 		-- Show log
@@ -163,8 +154,6 @@ function M.refresh_log()
 		show_error_message("not_jj_repo", validation.error)
 		return false
 	end
-
-	show_info_message("Refreshing jj log...")
 
 	-- Get fresh colored log output
 	local colored_output, error_type, error_details = get_colored_log_output()
@@ -190,7 +179,6 @@ function M.refresh_log()
 	-- Update stored log data
 	current_log_data = colored_output
 
-	show_info_message("jj log refreshed successfully")
 	return true
 end
 

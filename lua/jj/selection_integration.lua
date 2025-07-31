@@ -63,9 +63,9 @@ function M._execute_immediate_command(command_def, bufnr)
 	})
 
 	if result.success then
-		vim.notify("Command executed successfully", vim.log.levels.INFO)
+		vim.notify("Successfully executed: jj " .. full_command, vim.log.levels.INFO)
 	else
-		vim.notify("Command failed: " .. (result.error or "Unknown error"), vim.log.levels.ERROR)
+		vim.notify("Command failed: jj " .. full_command .. " - " .. (result.error or "Unknown error"), vim.log.levels.ERROR)
 	end
 
 	return {
@@ -170,15 +170,15 @@ function M._complete_workflow(bufnr)
 		timestamp = os.time(),
 	})
 
-	-- Notify user
+	-- Notify user with command details
 	if result.success then
-		vim.notify("Command executed successfully", vim.log.levels.INFO)
+		vim.notify("Successfully executed: jj " .. command_string, vim.log.levels.INFO)
 		
 		-- Refresh the log window after successful command execution
 		local log = require("jj.log.init")
 		log.refresh_log()
 	else
-		vim.notify("Command failed: " .. (result.error or "Unknown error"), vim.log.levels.ERROR)
+		vim.notify("Command failed: jj " .. command_string .. " - " .. (result.error or "Unknown error"), vim.log.levels.ERROR)
 	end
 
 	-- Clean up workflow

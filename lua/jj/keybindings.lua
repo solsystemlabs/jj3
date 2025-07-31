@@ -288,8 +288,12 @@ function M._execute_quick_action(command_name)
 				-- Selection workflow started - user feedback handled by selection system
 				vim.notify(result.message or "Selection mode started", vim.log.levels.INFO)
 			else
-				-- Immediate command executed
-				vim.notify("Command executed successfully", vim.log.levels.INFO)
+				-- Immediate command executed - show command details if available
+				local success_msg = "Command executed successfully"
+				if result.executed_command then
+					success_msg = "Successfully executed: " .. result.executed_command
+				end
+				vim.notify(success_msg, vim.log.levels.INFO)
 
 				-- Refresh the log window after successful immediate command
 				local log = require("jj.log.init")

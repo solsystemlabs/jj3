@@ -59,9 +59,6 @@ function M.manual_refresh(window_mock)
 	refresh_state.is_refreshing = true
 	refresh_state.last_refresh_time = os.time()
 
-	-- Provide user feedback
-	vim.notify("jj.nvim: Refreshing jj log...", vim.log.levels.INFO)
-
 	-- Get current cursor position to preserve it
 	local current_window = vim.api.nvim_get_current_win()
 	local cursor_pos = vim.api.nvim_win_get_cursor(current_window)
@@ -99,7 +96,6 @@ function M.manual_refresh(window_mock)
 			pcall(vim.api.nvim_win_set_cursor, current_window, cursor_pos)
 		end
 
-		vim.notify("jj.nvim: Log refreshed successfully", vim.log.levels.INFO)
 		return true
 	else
 		vim.notify("jj.nvim: Failed to refresh log", vim.log.levels.ERROR)

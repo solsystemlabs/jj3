@@ -241,4 +241,9 @@ function M.is_queue_near_capacity()
 	return false
 end
 
+-- Internal test function to set refresh state (for testing only)
+function M._set_refresh_active(active)
+	queue_state.is_refresh_active = active
+end
+
 return M
