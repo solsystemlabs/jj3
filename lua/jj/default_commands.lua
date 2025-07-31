@@ -82,18 +82,27 @@ local DEFAULT_COMMANDS = {
 					desc = "Rebase current onto selected",
 					cmd = "rebase",
 					args = { "-d", "{target}" },
+					phases = {
+						{ key = "target", prompt = "Select target commit to rebase onto" },
+					},
 				},
 				{
 					key = "2",
 					desc = "Rebase branch onto selected",
 					cmd = "rebase",
 					args = { "-b", "@", "-d", "{target}" },
+					phases = {
+						{ key = "target", prompt = "Select target commit to rebase branch onto" },
+					},
 				},
 				{
 					key = "3",
 					desc = "Rebase with descendants",
 					cmd = "rebase",
 					args = { "-s", "@", "-d", "{target}" },
+					phases = {
+						{ key = "target", prompt = "Select target commit to rebase with descendants onto" },
+					},
 				},
 			},
 		},
@@ -267,7 +276,6 @@ function M.execute_with_confirmation(command_name, context)
 			error = "Command '" .. command_name .. "' not found in defaults",
 		}
 	end
-
 
 	-- Check if confirmation is required
 	local requires_confirmation = command_def.quick_action and command_def.quick_action.confirm
