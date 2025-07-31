@@ -14,11 +14,11 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.4 Integrate substitution into command execution pipeline
   - [x] 1.5 Verify all variable substitution tests pass
 
-- [ ] 2. Fix Rebase Command Execution
-  - [ ] 2.1 Write tests for rebase command with proper substitution
-  - [ ] 2.2 Update rebase command configuration to use substitution system
-  - [ ] 2.3 Test rebase functionality with actual commit IDs
-  - [ ] 2.4 Verify rebase commands execute successfully without syntax errors
+- [x] 2. Fix Rebase Command Execution
+  - [x] 2.1 Write tests for rebase command with proper substitution
+  - [x] 2.2 Update rebase command configuration to use substitution system
+  - [x] 2.3 Test rebase functionality with actual commit IDs
+  - [x] 2.4 Verify rebase commands execute successfully without syntax errors
 
 - [ ] 3. Improve Error Handling and User Feedback
   - [ ] 3.1 Write tests for error scenarios (missing variables, invalid commit IDs)
