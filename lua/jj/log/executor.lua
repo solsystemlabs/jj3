@@ -57,7 +57,16 @@ function M.execute_jj_command(command)
 		}
 	end
 
-	-- Execute the command
+	-- Route through interactive detection system
+	local cmd_parts = M._parse_command(command)
+	local is_interactive = M._should_use_interactive_mode(cmd_parts.cmd, cmd_parts.args)
+	
+	if is_interactive then
+		-- Execute in interactive terminal mode
+		return M._execute_interactive_command(command, cmd_parts.cmd, cmd_parts.args)
+	end
+
+	-- Execute the command normally
 	local full_command = "jj " .. command
 	local output = vim.fn.system(full_command)
 	local exit_code = vim.v.shell_error
@@ -142,6 +151,16 @@ function M.execute_async(command, callback)
 			error = "Command contains unsafe characters",
 			output = nil,
 		})
+		return
+	end
+
+	-- Route through interactive detection system
+	local cmd_parts = M._parse_command(command)
+	local is_interactive = M._should_use_interactive_mode(cmd_parts.cmd, cmd_parts.args)
+	
+	if is_interactive then
+		-- Execute in interactive terminal mode asynchronously
+		M._execute_interactive_command_async(command, cmd_parts.cmd, cmd_parts.args, callback)
 		return
 	end
 
@@ -288,6 +307,138 @@ function M._is_safe_command(command)
 	end
 
 	return true
+end
+
+-- Parse command string into cmd and args
+function M._parse_command(command)
+	if not command or type(command) ~= "string" then
+		return { cmd = "", args = {} }
+	end
+	
+	-- Simple space-based parsing (could be enhanced for complex quoting)
+	local parts = vim.split(command, "%s+")
+	local cmd = parts[1] or ""
+	local args = {}
+	
+	for i = 2, #parts do
+		table.insert(args, parts[i])
+	end
+	
+	return { cmd = cmd, args = args }
+end
+
+-- Check if command should use interactive mode
+function M._should_use_interactive_mode(cmd, args)
+	-- Try to load interactive detection module
+	local ok, interactive_detection = pcall(require, "jj.interactive_detection")
+	if not ok then
+		-- Fallback: no interactive detection available
+		return false
+	end
+	
+	return interactive_detection.is_interactive_command(cmd, args)
+end
+
+-- Execute command in interactive terminal mode (placeholder for now)
+function M._execute_interactive_command(command, cmd, args)
+	-- TODO: This will be implemented in Task 2 (Floating Terminal Window Management)
+	-- For now, fall back to normal execution to maintain compatibility
+	
+	-- Log that we detected an interactive command but are falling back
+	if vim.notify then
+		vim.notify("Interactive command detected: " .. cmd .. " (falling back to normal execution)", vim.log.levels.INFO)
+	end
+	
+	-- Execute normally for now
+	local full_command = "jj " .. command
+	local output = vim.fn.system(full_command)
+	local exit_code = vim.v.shell_error
+	
+	local result = nil
+	if exit_code == 0 then
+		result = {
+			success = true,
+			error = nil,
+			output = output,
+			interactive_fallback = true,
+		}
+	else
+		result = {
+			success = false,
+			error = "Command failed with exit code " .. exit_code .. ": " .. output,
+			output = nil,
+			interactive_fallback = true,
+		}
+	end
+	
+	return result
+end
+
+-- Execute command in interactive terminal mode asynchronously (placeholder for now)
+function M._execute_interactive_command_async(command, cmd, args, callback)
+	-- TODO: This will be implemented in Task 2 (Floating Terminal Window Management)
+	-- For now, fall back to normal async execution to maintain compatibility
+	
+	-- Log that we detected an interactive command but are falling back
+	if vim.notify then
+		vim.notify("Interactive command detected: " .. cmd .. " (falling back to async execution)", vim.log.levels.INFO)
+	end
+	
+	-- Execute normally using existing async path
+	local full_command = "jj " .. command
+	local output_lines = {}
+
+	local job_id = vim.fn.jobstart(full_command, {
+		stdout_buffered = true,
+		stderr_buffered = true,
+		on_stdout = function(_, data)
+			if data then
+				vim.list_extend(output_lines, data)
+			end
+		end,
+		on_stderr = function(_, data)
+			if data then
+				vim.list_extend(output_lines, data)
+			end
+		end,
+		on_exit = function(_, exit_code)
+			local output = table.concat(output_lines, "\n")
+
+			local result = nil
+			if exit_code == 0 then
+				result = {
+					success = true,
+					error = nil,
+					output = output,
+					interactive_fallback = true,
+				}
+			else
+				result = {
+					success = false,
+					error = "Command failed with exit code " .. exit_code .. ": " .. output,
+					output = nil,
+					interactive_fallback = true,
+				}
+			end
+
+			-- Trigger auto-refresh hooks after async command completion
+			local ok, auto_refresh = pcall(require, "jj.auto_refresh")
+			if ok then
+				auto_refresh.on_command_complete(command, result.success, result.output or result.error)
+			end
+
+			callback(result)
+		end,
+	})
+
+	if job_id <= 0 then
+		callback({
+			success = false,
+			error = "Failed to start job",
+			output = nil,
+			interactive_fallback = true,
+		})
+	end
 end
 
 return M
