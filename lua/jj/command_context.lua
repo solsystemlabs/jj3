@@ -125,42 +125,9 @@ end
 
 -- Substitute all remaining placeholders after selections are complete (phase 2)
 function M.substitute_final_placeholders(args, context)
-	local substituted = {}
-
-	for _, arg in ipairs(args) do
-		if type(arg) == "string" then
-			local substituted_arg = arg
-
-			-- Handle user input prompt
-			if substituted_arg:match("{user_input}") then
-				local input = vim.fn.input("Commit description: ")
-				if input and input ~= "" then
-					substituted_arg = substituted_arg:gsub("{user_input}", input)
-				else
-					-- If no input provided, skip this argument and the preceding -m flag if present
-					if #substituted > 0 and substituted[#substituted] == "-m" then
-						table.remove(substituted)
-					end
-					goto continue
-				end
-			end
-
-			-- Handle other context-based placeholders
-			if substituted_arg:match("{commit_id}") then
-				substituted_arg = substituted_arg:gsub("{commit_id}", context.commit_id or "@")
-			end
-			if substituted_arg:match("{change_id}") then
-				substituted_arg = substituted_arg:gsub("{change_id}", context.change_id or "@")
-			end
-
-			table.insert(substituted, substituted_arg)
-			::continue::
-		else
-			table.insert(substituted, arg)
-		end
-	end
-
-	return substituted
+	-- Use the unified substitution system from command_execution
+	local command_execution = require("jj.command_execution")
+	return command_execution.substitute_parameters(args, context)
 end
 
 -- Validate a command definition for consistency

@@ -162,12 +162,10 @@ end
 -- Integration functions for auto-refresh system
 function M.on_refresh_start()
 	M.set_refresh_active(true)
-	vim.notify("jj.nvim: Refresh started - commands will be queued", vim.log.levels.DEBUG)
 end
 
 function M.on_refresh_complete()
 	M.set_refresh_active(false)
-	vim.notify("jj.nvim: Refresh completed - processing queued commands", vim.log.levels.DEBUG)
 
 	-- Process any queued commands
 	if not M.is_empty() then
@@ -177,11 +175,9 @@ end
 
 function M.on_refresh_error(error_msg)
 	M.set_refresh_active(false)
-	vim.notify("jj.nvim: Refresh failed: " .. (error_msg or "unknown error"), vim.log.levels.ERROR)
 
 	-- Still process queued commands even if refresh failed
 	if not M.is_empty() then
-		vim.notify("jj.nvim: Processing queued commands despite refresh failure", vim.log.levels.INFO)
 		M.process_queue()
 	end
 end

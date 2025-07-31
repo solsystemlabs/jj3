@@ -38,8 +38,15 @@ function M._execute_immediate_command(command_def, bufnr)
 		}
 	end
 
+	-- Get current cursor context for variable substitution
+	local command_execution = require("jj.command_execution")
+	local context = command_execution.get_command_context()
+	
+	-- Use unified variable substitution system
+	local substituted_args = command_execution.substitute_parameters(quick_action.args or {}, context)
+	
 	local command_parts = { quick_action.cmd }
-	for _, arg in ipairs(quick_action.args or {}) do
+	for _, arg in ipairs(substituted_args) do
 		table.insert(command_parts, arg)
 	end
 	local full_command = table.concat(command_parts, " ")
