@@ -160,6 +160,7 @@ local DEFAULT_COMMANDS = {
 			args = { "-r", "{change_id}" },
 			keymap = "s",
 			description = "Squash into parent",
+			confirm = true,
 		},
 		menu = {
 			keymap = "S",
