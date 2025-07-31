@@ -13,7 +13,7 @@ M.defaults = {
 		position = "right",
 		size = 50,
 		window_type = "floating", -- "floating" or "split"
-		border = {"", "", "", "│", "", "", "", ""}, -- Default: left border only
+		border = { "", "", "", "", "", "", "", "│" }, -- Default: left border only
 		title = nil, -- No title by default
 		title_pos = "center",
 	},
@@ -33,7 +33,7 @@ function M.setup(opts)
 	opts = opts or {}
 	-- Always start with a fresh copy of defaults
 	local merged_opts = vim.tbl_deep_extend("force", vim.deepcopy(M.defaults), opts)
-	
+
 	-- Validate window_type if provided or ensure it exists
 	if merged_opts.window then
 		if merged_opts.window.window_type then
@@ -47,7 +47,7 @@ function M.setup(opts)
 			merged_opts.window.window_type = M.defaults.window.window_type
 		end
 	end
-	
+
 	M.options = merged_opts
 end
 

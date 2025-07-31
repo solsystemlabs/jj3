@@ -18,7 +18,7 @@ describe("Configurable borders and title", function()
     it("should use left border only by default", function()
       local opts = config.get()
       -- Default should have left border only
-      assert.are.same({"", "", "", "│", "", "", "", ""}, opts.window.border)
+      assert.are.same({"", "", "", "", "", "", "", "│"}, opts.window.border)
       assert.is_nil(opts.window.title)
     end)
 
@@ -82,7 +82,7 @@ describe("Configurable borders and title", function()
     it("should allow partial borders", function()
       config.setup({
         window = {
-          border = {"", "", "", "│", "", "─", "", ""}  -- Left and bottom only
+          border = {"", "", "", "", "", "─", "", "│"}  -- Left and bottom only
         }
       })
       
@@ -155,7 +155,7 @@ describe("Configurable borders and title", function()
     it("should allow runtime override of border config", function()
       config.setup({
         window = {
-          border = {"", "", "", "│", "", "", "", ""}  -- Left only
+          border = {"", "", "", "", "", "", "", "│"}  -- Left only
         }
       })
       

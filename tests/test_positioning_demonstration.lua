@@ -144,7 +144,7 @@ describe("Log window positioning demonstration", function()
     config.setup({
       window = {
         window_type = "floating",
-        border = {"", "", "", "│", "", "─", "", ""}
+        border = {"", "", "", "", "", "─", "", "│"}
       }
     })
     
