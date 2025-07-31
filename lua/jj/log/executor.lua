@@ -339,52 +339,113 @@ function M._should_use_interactive_mode(cmd, args)
 	return interactive_detection.is_interactive_command(cmd, args)
 end
 
--- Execute command in interactive terminal mode (placeholder for now)
+-- Execute command in interactive terminal mode
 function M._execute_interactive_command(command, cmd, args)
-	-- TODO: This will be implemented in Task 2 (Floating Terminal Window Management)
-	-- For now, fall back to normal execution to maintain compatibility
-	
-	-- Log that we detected an interactive command but are falling back
-	if vim.notify then
-		vim.notify("Interactive command detected: " .. cmd .. " (falling back to normal execution)", vim.log.levels.INFO)
+	-- Try to load terminal manager
+	local ok, terminal_manager = pcall(require, "jj.terminal_manager")
+	if not ok then
+		-- Fallback if terminal manager not available
+		if vim.notify then
+			vim.notify("Terminal manager not available, falling back to normal execution", vim.log.levels.WARN)
+		end
+		return M._fallback_to_normal_execution(command)
 	end
 	
-	-- Execute normally for now
+	-- Create terminal window for interactive command
+	local terminal_result = terminal_manager.create_terminal_window(command, nil, function(exit_code)
+		-- Handle post-execution tasks
+		M._handle_interactive_command_completion(command, exit_code)
+	end)
+	
+	if terminal_result.error then
+		-- Terminal creation failed, fall back to normal execution
+		if vim.notify then
+			vim.notify("Failed to create terminal: " .. terminal_result.error, vim.log.levels.WARN)
+		end
+		return M._fallback_to_normal_execution(command)
+	end
+	
+	-- Return success result for interactive command
+	return {
+		success = true,
+		error = nil,
+		output = "Interactive command started in terminal",
+		interactive = true,
+		terminal_info = {
+			buffer_id = terminal_result.buffer_id,
+			window_id = terminal_result.window_id,
+			job_id = terminal_result.job_id,
+		}
+	}
+end
+
+-- Execute command in interactive terminal mode asynchronously
+function M._execute_interactive_command_async(command, cmd, args, callback)
+	-- Try to load terminal manager
+	local ok, terminal_manager = pcall(require, "jj.terminal_manager")
+	if not ok then
+		-- Fallback if terminal manager not available
+		if vim.notify then
+			vim.notify("Terminal manager not available, falling back to async execution", vim.log.levels.WARN)
+		end
+		M._fallback_to_async_execution(command, callback)
+		return
+	end
+	
+	-- Create terminal window for interactive command
+	local terminal_result = terminal_manager.create_terminal_window(command, nil, function(exit_code)
+		-- Handle post-execution tasks
+		M._handle_interactive_command_completion(command, exit_code)
+		
+		-- Call the original callback
+		local result = {
+			success = exit_code == 0,
+			error = exit_code == 0 and nil or ("Command exited with code " .. exit_code),
+			output = exit_code == 0 and "Interactive command completed successfully" or nil,
+			interactive = true,
+			exit_code = exit_code,
+		}
+		
+		callback(result)
+	end)
+	
+	if terminal_result.error then
+		-- Terminal creation failed, fall back to async execution
+		if vim.notify then
+			vim.notify("Failed to create terminal: " .. terminal_result.error, vim.log.levels.WARN)
+		end
+		M._fallback_to_async_execution(command, callback)
+		return
+	end
+	
+	-- For async, we don't return immediately - the callback will be called when the terminal exits
+end
+
+-- Fallback to normal synchronous execution
+function M._fallback_to_normal_execution(command)
 	local full_command = "jj " .. command
 	local output = vim.fn.system(full_command)
 	local exit_code = vim.v.shell_error
 	
-	local result = nil
 	if exit_code == 0 then
-		result = {
+		return {
 			success = true,
 			error = nil,
 			output = output,
-			interactive_fallback = true,
+			fallback = true,
 		}
 	else
-		result = {
+		return {
 			success = false,
 			error = "Command failed with exit code " .. exit_code .. ": " .. output,
 			output = nil,
-			interactive_fallback = true,
+			fallback = true,
 		}
 	end
-	
-	return result
 end
 
--- Execute command in interactive terminal mode asynchronously (placeholder for now)
-function M._execute_interactive_command_async(command, cmd, args, callback)
-	-- TODO: This will be implemented in Task 2 (Floating Terminal Window Management)
-	-- For now, fall back to normal async execution to maintain compatibility
-	
-	-- Log that we detected an interactive command but are falling back
-	if vim.notify then
-		vim.notify("Interactive command detected: " .. cmd .. " (falling back to async execution)", vim.log.levels.INFO)
-	end
-	
-	-- Execute normally using existing async path
+-- Fallback to normal asynchronous execution
+function M._fallback_to_async_execution(command, callback)
 	local full_command = "jj " .. command
 	local output_lines = {}
 
@@ -410,14 +471,14 @@ function M._execute_interactive_command_async(command, cmd, args, callback)
 					success = true,
 					error = nil,
 					output = output,
-					interactive_fallback = true,
+					fallback = true,
 				}
 			else
 				result = {
 					success = false,
 					error = "Command failed with exit code " .. exit_code .. ": " .. output,
 					output = nil,
-					interactive_fallback = true,
+					fallback = true,
 				}
 			end
 
@@ -436,8 +497,19 @@ function M._execute_interactive_command_async(command, cmd, args, callback)
 			success = false,
 			error = "Failed to start job",
 			output = nil,
-			interactive_fallback = true,
+			fallback = true,
 		})
+	end
+end
+
+-- Handle post-interactive command completion tasks
+function M._handle_interactive_command_completion(command, exit_code)
+	-- Trigger auto-refresh hooks after interactive command completion
+	local ok, auto_refresh = pcall(require, "jj.auto_refresh")
+	if ok then
+		local success = exit_code == 0
+		local output = success and "Interactive command completed" or ("Command failed with exit code " .. exit_code)
+		auto_refresh.on_command_complete(command, success, output)
 	end
 end
 

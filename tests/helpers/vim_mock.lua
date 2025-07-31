@@ -56,6 +56,10 @@ _G.vim = {
     end,
     nvim_open_win = function(buffer_id, enter, config)
       local window_id = math.random(1000, 9999)
+      -- If enter is true, automatically focus the window
+      if enter and vim.api.nvim_set_current_win then
+        vim.api.nvim_set_current_win(window_id)
+      end
       return window_id
     end,
     nvim_win_is_valid = function(window_id)
@@ -143,6 +147,20 @@ _G.vim = {
     confirm = function(msg, choices, default)
       -- Mock confirmation dialog
       return default or 1
+    end,
+    termopen = function(cmd, opts)
+      -- Mock terminal creation without executing real commands
+      vim.v.shell_error = 0 -- Simulate success
+      
+      -- Simulate terminal behavior
+      if opts and opts.on_exit then
+        -- Simulate async terminal exit immediately for tests
+        vim.defer_fn(function()
+          opts.on_exit(123, 0, "exit")
+        end, 1)
+      end
+      
+      return 123 -- Mock terminal job ID
     end,
   },
   v = {
@@ -262,6 +280,10 @@ _G.vim = {
   end,
   notify = function(message, level)
     -- Mock notification
+  end,
+  defer_fn = function(fn, timeout)
+    -- Mock deferred function execution - just call immediately for tests
+    fn()
   end,
   log = {
     levels = {
