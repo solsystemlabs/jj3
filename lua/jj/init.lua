@@ -30,6 +30,14 @@ function M.setup(opts)
 		keybindings.apply_user_keybinding_overrides(user_config.keybinding_overrides)
 	end
 
+	-- Configure interactive command detection if available
+	if user_config.interactive then
+		local ok, interactive_detection = pcall(require, "jj.interactive_detection")
+		if ok then
+			interactive_detection.set_user_config(user_config.interactive)
+		end
+	end
+
 	-- Note: Auto-refresh is handled by individual commands, not globally
 	-- This provides better control over when refresh happens
 

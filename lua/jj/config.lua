@@ -23,6 +23,16 @@ M.defaults = {
 
 	-- Keybinding overrides for default commands
 	keybinding_overrides = {},
+
+	-- Interactive command configuration
+	interactive = {
+		-- Commands to force into interactive mode
+		force_interactive = {},
+		-- Commands to force into non-interactive mode
+		force_non_interactive = {},
+		-- Custom interactive flags for specific commands
+		custom_interactive_flags = {},
+	},
 }
 
 -- Current configuration (starts with defaults)
