@@ -38,12 +38,57 @@ _G.vim = {
       }
       return mock_highlights[name] or {}
     end,
+    nvim_create_augroup = function(name, opts)
+      return 1 -- Return mock autocmd group ID
+    end,
+    nvim_create_buf = function(listed, scratch)
+      local buffer_id = math.random(1000, 9999)
+      return buffer_id
+    end,
+    nvim_buf_is_valid = function(buffer_id)
+      return true
+    end,
+    nvim_buf_set_option = function(buffer_id, option, value)
+      -- Mock buffer option setting
+    end,
+    nvim_buf_set_name = function(buffer_id, name)
+      -- Mock buffer name setting
+    end,
+    nvim_open_win = function(buffer_id, enter, config)
+      local window_id = math.random(1000, 9999)
+      return window_id
+    end,
+    nvim_win_is_valid = function(window_id)
+      return true
+    end,
+    nvim_win_set_option = function(window_id, option, value)
+      -- Mock window option setting
+    end,
+    nvim_win_close = function(window_id, force)
+      -- Mock window closing
+    end,
+    nvim_get_current_win = function()
+      return math.random(1000, 9999)
+    end,
+    nvim_set_current_win = function(window_id)
+      -- Mock window focus
+    end,
+    nvim_win_set_buf = function(window_id, buffer_id)
+      -- Mock setting buffer in window
+    end,
   },
   keymap = {
     set = function(mode, lhs, rhs, opts)
       -- Mock implementation
     end,
   },
+  o = {
+    columns = 120,
+    lines = 30
+  },
+  cmd = function(command)
+    -- Mock vim command execution
+  end,
   fn = {
     getcwd = function()
       return lfs.currentdir()
@@ -127,14 +172,26 @@ _G.vim = {
     return copy
   end,
   tbl_deep_extend = function(behavior, ...)
-    -- Simple merge implementation for testing
+    -- Deep merge implementation for testing
+    local function deep_merge(target, source)
+      if type(target) ~= 'table' then target = {} end
+      if type(source) ~= 'table' then return target end
+      
+      for k, v in pairs(source) do
+        if type(v) == 'table' and type(target[k]) == 'table' then
+          target[k] = deep_merge(target[k], v)
+        else
+          target[k] = v
+        end
+      end
+      return target
+    end
+    
     local result = {}
     for i = 1, select('#', ...) do
       local tbl = select(i, ...)
       if type(tbl) == 'table' then
-        for k, v in pairs(tbl) do
-          result[k] = v
-        end
+        result = deep_merge(result, tbl)
       end
     end
     return result

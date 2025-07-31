@@ -180,7 +180,7 @@ vim.api.nvim_win_set_option = function(window_id, option, value)
 end
 
 -- Load the window module from the plugin directory
-local window = dofile("../lua/jj/ui/window.lua")
+local window = require("jj.ui.window")
 
 describe("JJ Window Management", function()
   local lfs = require('lfs')

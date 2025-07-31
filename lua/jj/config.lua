@@ -12,6 +12,7 @@ M.defaults = {
 	window = {
 		position = "right",
 		size = 50,
+		window_type = "floating", -- "floating" or "split"
 	},
 
 	-- Command customization (user-defined commands)
@@ -27,7 +28,24 @@ M.options = vim.deepcopy(M.defaults)
 -- Setup configuration
 function M.setup(opts)
 	opts = opts or {}
-	M.options = vim.tbl_deep_extend("force", M.defaults, opts)
+	-- Always start with a fresh copy of defaults
+	local merged_opts = vim.tbl_deep_extend("force", vim.deepcopy(M.defaults), opts)
+	
+	-- Validate window_type if provided or ensure it exists
+	if merged_opts.window then
+		if merged_opts.window.window_type then
+			local valid_types = { floating = true, split = true }
+			if not valid_types[merged_opts.window.window_type] then
+				-- Invalid type, fall back to default
+				merged_opts.window.window_type = M.defaults.window.window_type
+			end
+		else
+			-- Ensure window_type is set to default if not provided
+			merged_opts.window.window_type = M.defaults.window.window_type
+		end
+	end
+	
+	M.options = merged_opts
 end
 
 -- Get current configuration

@@ -4,6 +4,7 @@ local M = {}
 -- Import renderer for content display
 local renderer = require("jj.log.renderer")
 local navigation_integration = require("jj.ui.navigation_integration")
+local config = require("jj.config")
 
 -- Default configuration
 local DEFAULT_CONFIG = {
@@ -74,18 +75,46 @@ function M.get_or_create_log_buffer()
 	return M.create_log_buffer()
 end
 
+-- Calculate floating window position relative to entire Neovim interface
+local function calculate_floating_position(width, height)
+	local total_width = vim.o.columns
+	local total_height = vim.o.lines
+	
+	-- Position at the right edge with some padding
+	local col = total_width - width - 2  -- 2 columns padding from right edge
+	local row = 2  -- 2 lines from top
+	
+	-- Handle edge cases where window would exceed bounds
+	if col < 0 then col = 0 end
+	if row < 0 then row = 0 end
+	if row + height > total_height then
+		row = total_height - height
+		if row < 0 then row = 0 end
+	end
+	
+	return {
+		col = col,
+		row = row,
+		width = width,
+		height = height
+	}
+end
+
 -- Calculate window configuration based on position and style
 local function calculate_window_config(config)
 	local win_config = {}
 
 	if config.style == "floating" then
+		-- Use global positioning for floating windows
+		local position = calculate_floating_position(config.width, config.height)
+		
 		-- Floating window configuration
 		win_config = {
-			relative = config.relative,
-			width = config.width,
-			height = config.height,
-			row = config.row,
-			col = config.col,
+			relative = "editor",  -- Always position relative to entire editor
+			width = position.width,
+			height = position.height,
+			row = position.row,
+			col = position.col,
 			border = config.border,
 			style = "minimal",
 			focusable = config.focusable,
@@ -148,15 +177,37 @@ function M.create_window(config)
 end
 
 -- Open log window with specified configuration
-function M.open_log_window(config)
-	-- Merge user config with current config
+function M.open_log_window(user_config)
+	-- Start with current window config
 	local merged_config = vim.deepcopy(current_config)
-	if config then
-		for k, v in pairs(config) do
+	
+	-- Get user configuration from config module
+	local user_global_config = config.get()
+	
+	-- Apply global window configuration
+	if user_global_config.window then
+		-- Map window_type from config to style
+		if user_global_config.window.window_type == "floating" then
+			merged_config.style = "floating"
+		elseif user_global_config.window.window_type == "split" then
+			merged_config.style = "split"
+			merged_config.position = user_global_config.window.position or "right"
+		end
+		
+		-- Apply other window config options
+		if user_global_config.window.size then
+			merged_config.width = user_global_config.window.size
+		end
+	end
+	
+	-- Apply user-provided config (overrides global config)
+	if user_config then
+		for k, v in pairs(user_config) do
 			merged_config[k] = v
 		end
 	end
-	config = merged_config
+	
+	local final_config = merged_config
 
 	-- Get or create buffer
 	local buffer_id = M.get_or_create_log_buffer()
@@ -166,13 +217,13 @@ function M.open_log_window(config)
 
 	local window_id
 
-	if config.style == "floating" then
+	if final_config.style == "floating" then
 		-- Create floating window
-		local win_config = calculate_window_config(config)
-		window_id = vim.api.nvim_open_win(buffer_id, config.focusable, win_config)
+		local win_config = calculate_window_config(final_config)
+		window_id = vim.api.nvim_open_win(buffer_id, final_config.focusable, win_config)
 	else
 		-- Create split window
-		window_id = M.create_split_window(buffer_id, config)
+		window_id = M.create_split_window(buffer_id, final_config)
 	end
 
 	if not window_id then
