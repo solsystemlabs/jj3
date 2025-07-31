@@ -11,7 +11,7 @@ M.defaults = {
 	-- Window options
 	window = {
 		position = "right",
-		size = 50,
+		size = 70,
 		window_type = "floating", -- "floating" or "split"
 		border = { "", "", "", "", "", "", "", "│" }, -- Default: left border only
 		title = nil, -- No title by default
