@@ -203,21 +203,9 @@ local DEFAULT_COMMANDS = {
 	describe_current = {
 		quick_action = {
 			cmd = "describe",
-			args = { "-m", "{user_input}" },
+			args = { "-r", "{change_id}", "-m", "{user_input}" },
 			keymap = "d",
 			description = "Edit description of current commit",
-		},
-		menu = {
-			keymap = "D",
-			title = "Describe Options",
-			options = {
-				{
-					key = "1",
-					desc = "Edit current commit description",
-					cmd = "describe",
-					args = { "-m", "{user_input}" },
-				},
-			},
 		},
 	},
 
