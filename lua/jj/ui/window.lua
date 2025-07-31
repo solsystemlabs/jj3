@@ -80,23 +80,26 @@ local function calculate_floating_position(width, height)
 	local total_width = vim.o.columns
 	local total_height = vim.o.lines
 	
+	-- Use full height minus space for command line and status line
+	local full_height = total_height - 2  -- Reserve 2 lines for command/status
+	
 	-- Position at the right edge with some padding
 	local col = total_width - width - 2  -- 2 columns padding from right edge
-	local row = 2  -- 2 lines from top
+	local row = 0  -- Start from top
 	
 	-- Handle edge cases where window would exceed bounds
 	if col < 0 then col = 0 end
 	if row < 0 then row = 0 end
-	if row + height > total_height then
-		row = total_height - height
-		if row < 0 then row = 0 end
-	end
+	
+	-- Use the calculated full height instead of user-provided height
+	local actual_height = full_height
+	if actual_height < 1 then actual_height = 1 end
 	
 	return {
 		col = col,
 		row = row,
 		width = width,
-		height = height
+		height = actual_height
 	}
 end
 
