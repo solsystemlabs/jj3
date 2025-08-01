@@ -2,7 +2,7 @@
 local M = {}
 
 -- Import dependencies
-local command_execution = require("jj.command_execution")
+local command_context = require("jj.command_context")
 local selection_integration = require("jj.selection_integration")
 local menu = require("jj.menu")
 
@@ -19,7 +19,7 @@ function M.register_command_keybindings(buffer_id, command_name)
 		}
 	end
 
-	local command_def = command_execution.get_command(command_name)
+	local command_def = command_context.get_command(command_name)
 	if not command_def then
 		return {
 			success = false,
@@ -129,7 +129,7 @@ end
 -- Detect keybinding conflicts for a command
 function M.detect_keybinding_conflicts(buffer_id, command_name)
 	local conflicts = {}
-	local command_def = command_execution.get_command(command_name)
+	local command_def = command_context.get_command(command_name)
 
 	if not command_def then
 		return conflicts
@@ -253,7 +253,7 @@ end
 
 -- Internal function to get effective keymap (considering user overrides)
 function M._get_effective_keymap(command_name, action_type)
-	local command_def = command_execution.get_command(command_name)
+	local command_def = command_context.get_command(command_name)
 	local default_keymap
 
 	if action_type == "quick_action" and command_def.quick_action then
@@ -279,7 +279,7 @@ function M._execute_quick_action(command_name)
 	local bufnr = vim.api.nvim_get_current_buf()
 
 	-- Get command definition to check if it needs selection workflow
-	local command_def = command_execution.get_command(command_name)
+	local command_def = command_context.get_command(command_name)
 
 	if not command_def then
 		vim.notify("Command not found: " .. command_name, vim.log.levels.ERROR)

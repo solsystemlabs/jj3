@@ -125,9 +125,54 @@ end
 
 -- Substitute all remaining placeholders after selections are complete (phase 2)
 function M.substitute_final_placeholders(args, context)
-	-- Use the unified substitution system from command_execution
-	local command_execution = require("jj.command_execution")
-	return command_execution.substitute_parameters(args, context)
+	local substituted = {}
+	context = context or {}
+
+	for _, arg in ipairs(args) do
+		if arg == "{commit_id}" then
+			table.insert(substituted, context.commit_id or "@")
+		elseif arg == "{change_id}" then
+			table.insert(substituted, context.change_id or context.commit_id or "@")
+		elseif arg == "{target}" then
+			table.insert(substituted, context.target or context.commit_id or "@")
+		elseif arg == "{multi_target}" then
+			-- Handle multiple targets for multi-parent commits
+			if context.multi_target and type(context.multi_target) == "table" then
+				for _, target in ipairs(context.multi_target) do
+					table.insert(substituted, target)
+				end
+			else
+				-- Fallback to single target
+				table.insert(substituted, context.target or context.commit_id or "@")
+			end
+		elseif arg == "{user_input}" then
+			local input = vim.fn.input("Enter value: ")
+			if input ~= "" then
+				table.insert(substituted, input)
+			end
+			-- Skip empty input - don't add to substituted args
+		else
+			table.insert(substituted, arg)
+		end
+	end
+
+	return substituted
+end
+
+-- Get command context from current cursor position
+function M.get_command_context()
+	local parser = require("jj.log.parser")
+	local line = vim.api.nvim_get_current_line()
+	local basic_info = parser.extract_basic_commit_info(line)
+
+	local commit_id = basic_info and basic_info.commit_id or "@"
+	local change_id = basic_info and basic_info.change_id or basic_info and basic_info.commit_id or "@"
+
+	return {
+		commit_id = commit_id,
+		change_id = change_id,
+		line_content = line,
+	}
 end
 
 -- Validate a command definition for consistency
@@ -192,6 +237,23 @@ end
 -- Get a registered command definition
 function M.get_command_definition(name)
 	return command_registry[name]
+end
+
+-- Legacy compatibility: alias for get_command_definition
+function M.get_command(name)
+	return M.get_command_definition(name)
+end
+
+-- Merge user-defined commands with existing commands
+function M.merge_user_commands(user_commands)
+	for name, definition in pairs(user_commands) do
+		local is_valid, errors = M.validate_command_definition(definition)
+		if is_valid then
+			M.register_command(name, definition)
+		else
+			print("Warning: Invalid user command '" .. name .. "': " .. table.concat(errors, ", "))
+		end
+	end
 end
 
 -- Get all registered command definitions

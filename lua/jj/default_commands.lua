@@ -3,7 +3,6 @@ local M = {}
 
 -- Import dependencies
 local executor = require("jj.log.executor")
-local command_execution = require("jj.command_execution")
 local command_context = require("jj.command_context")
 
 -- Default command definitions (enhanced with selection phases)
@@ -239,14 +238,9 @@ function M.get_all_default_commands()
 	return DEFAULT_COMMANDS
 end
 
--- Register all default commands in both the legacy and new command systems
+-- Register all default commands in the unified command system
 function M.register_all_defaults()
-	-- Register in legacy command execution framework
-	for name, definition in pairs(DEFAULT_COMMANDS) do
-		command_execution.register_command(name, definition)
-	end
-
-	-- Register in new command context system with proper phase processing
+	-- Register in command context system with proper phase processing
 	for name, definition in pairs(DEFAULT_COMMANDS) do
 		command_context.register_command(name, definition)
 	end
@@ -284,47 +278,9 @@ function M.execute_with_confirmation(command_name, context)
 		end
 	end
 
-	-- Build and execute command
+	-- Build and execute command using unified parameter substitution
 	local args = command_def.quick_action.args or {}
-	local substituted_args = {}
-
-	for _, arg in ipairs(args) do
-		if arg == "{commit_id}" then
-			table.insert(substituted_args, context.commit_id or "@")
-		elseif arg == "{change_id}" then
-			table.insert(substituted_args, context.change_id or "@")
-		elseif arg == "{target}" then
-			table.insert(substituted_args, context.target or context.commit_id or "@")
-		elseif arg == "{multi_target}" then
-			-- Handle multiple targets for multi-parent commits
-			if context.multi_target and type(context.multi_target) == "table" then
-				for _, target in ipairs(context.multi_target) do
-					table.insert(substituted_args, target)
-				end
-			else
-				-- Fallback to single target
-				table.insert(substituted_args, context.target or context.commit_id or "@")
-			end
-		elseif arg == "{user_input}" then
-			local input = vim.fn.input("Commit description: ")
-			if input ~= "" then
-				table.insert(substituted_args, input)
-			else
-				-- For describe command, allow empty descriptions
-				if command_def.quick_action.cmd == "describe" then
-					table.insert(substituted_args, "")
-				else
-					-- For other commands, don't include -m flag if no description
-					-- Skip both this arg and the previous -m arg
-					if substituted_args[#substituted_args] == "-m" then
-						table.remove(substituted_args)
-					end
-				end
-			end
-		else
-			table.insert(substituted_args, arg)
-		end
-	end
+	local substituted_args = command_context.substitute_final_placeholders(args, context)
 
 	-- Build command string
 	local command_parts = { command_def.quick_action.cmd }

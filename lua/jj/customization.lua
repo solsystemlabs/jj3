@@ -3,7 +3,7 @@ local M = {}
 
 -- Import dependencies
 local config = require("jj.config")
-local command_execution = require("jj.command_execution")
+local command_context = require("jj.command_context")
 local default_commands = require("jj.default_commands")
 
 -- Load user command definitions from configuration
@@ -210,7 +210,7 @@ function M.apply_user_configuration()
 
 	-- Merge and register commands
 	local merged_commands = M.merge_commands_with_defaults(user_commands)
-	command_execution.merge_user_commands(merged_commands)
+	command_context.merge_user_commands(merged_commands)
 
 	return { success = true }
 end

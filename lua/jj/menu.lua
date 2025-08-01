@@ -2,11 +2,11 @@
 local M = {}
 
 -- Import dependencies
-local command_execution = require("jj.command_execution")
+local command_context = require("jj.command_context")
 
 -- Generate menu options from command definition
 function M.generate_menu_options(command_name)
-  local command_def = command_execution.get_command(command_name)
+  local command_def = command_context.get_command(command_name)
   
   if not command_def or not command_def.menu then
     return nil
@@ -53,7 +53,7 @@ end
 
 -- Show command menu using vim.ui.select
 function M.show_command_menu(command_name)
-  local command_def = command_execution.get_command(command_name)
+  local command_def = command_context.get_command(command_name)
   
   if not command_def then
     return {
@@ -83,7 +83,7 @@ function M.show_command_menu(command_name)
   local formatted_items = M.format_menu_items(options)
   
   -- Get current context for command execution
-  local context = command_execution.get_command_context()
+  local context = command_context.get_command_context()
   
   -- Show menu using vim.ui.select
   vim.ui.select(options, {
@@ -126,7 +126,9 @@ function M.show_command_menu(command_name)
         local execution_context = vim.tbl_extend("force", context, option_context)
         
         -- Execute command through command execution framework
-        local result = command_execution.execute_command(command_name, "menu_option", execution_context)
+        -- Note: menu execution should go through selection_integration for proper workflow handling
+        local selection_integration = require("jj.selection_integration")
+        local result = selection_integration.execute_command(command_name, vim.api.nvim_get_current_buf(), command_def)
         
         -- Provide user feedback
         if result.success then

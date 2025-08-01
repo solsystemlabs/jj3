@@ -20,8 +20,8 @@ function M.setup(opts)
 	-- Load user customizations if provided
 	local user_config = config.get()
 	if user_config.commands then
-		local command_execution = require("jj.command_execution")
-		command_execution.merge_user_commands(user_config.commands)
+		local command_context = require("jj.command_context")
+		command_context.merge_user_commands(user_config.commands)
 	end
 
 	-- Apply user keybinding overrides if provided
