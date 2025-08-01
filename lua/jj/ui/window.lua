@@ -28,6 +28,7 @@ local current_config = vim.deepcopy(DEFAULT_CONFIG)
 -- Window and buffer state
 local log_buffer_id = nil
 local log_window_id = nil
+local help_section_enabled = false
 
 -- Setup buffer with proper options including text wrapping (alias for create_log_buffer)
 function M.setup_buffer()
@@ -462,6 +463,11 @@ function M.render_log_content(raw_colored_output, commits)
 		navigation_integration.setup_navigation_integration(buffer_id, commits, true)
 	end
 
+	-- Render help section if enabled
+	if help_section_enabled then
+		M.render_help_section(buffer_id, true)
+	end
+
 	return result ~= nil
 end
 
@@ -643,6 +649,154 @@ function M.cleanup_cursor_line_highlighting(buffer_id)
 	M.clear_full_width_highlighting(buffer_id)
 
 	return true
+end
+
+-- Get merged keybind data from the keybinding system
+function M.get_merged_keybinds()
+	local buffer_id = M.get_log_buffer_id()
+	
+	if not buffer_id then
+		return {}
+	end
+	
+	-- Get merged keybinds from command definitions (since registry is internal)
+	local default_commands = require("jj.default_commands")
+	local command_context = require("jj.command_context")
+	local all_commands = default_commands.get_all_default_commands()
+	local merged_keybinds = {}
+	
+	for command_name, command_def in pairs(all_commands) do
+		-- Get the command definition through command_context to get merged version
+		local merged_def = command_context.get_command_definition(command_name)
+		
+		if merged_def and merged_def.quick_action and merged_def.quick_action.keymap then
+			merged_keybinds[merged_def.quick_action.keymap] = {
+				command = command_name,
+				action_type = "quick_action",
+				description = merged_def.quick_action.description,
+			}
+		end
+		if merged_def and merged_def.menu and merged_def.menu.keymap then
+			merged_keybinds[merged_def.menu.keymap] = {
+				command = command_name,
+				action_type = "menu", 
+				description = merged_def.menu.title or (command_name .. " Options"),
+			}
+		end
+	end
+	
+	return merged_keybinds
+end
+
+-- Format keybind data into display lines
+function M.format_keybind_lines(keybind_data)
+	if not keybind_data or vim.tbl_isempty(keybind_data) then
+		return { "No keybindings available" }
+	end
+	
+	local lines = {}
+	local sorted_keys = {}
+	
+	-- Sort keys for consistent display
+	for key, _ in pairs(keybind_data) do
+		table.insert(sorted_keys, key)
+	end
+	table.sort(sorted_keys)
+	
+	-- Format each keybinding
+	for _, key in ipairs(sorted_keys) do
+		local binding = keybind_data[key]
+		local description = binding.description or "No description"
+		local line = string.format("%s: %s", key, description)
+		table.insert(lines, line)
+	end
+	
+	return lines
+end
+
+-- Build complete help section content with separator
+function M.build_help_section_content(keybind_lines)
+	local content = {}
+	
+	-- Add separator line
+	table.insert(content, string.rep("─", 50))
+	table.insert(content, "Available Keybindings:")
+	table.insert(content, "")
+	
+	-- Add keybind lines
+	for _, line in ipairs(keybind_lines) do
+		table.insert(content, line)
+	end
+	
+	return content
+end
+
+-- Render help section to buffer
+function M.render_help_section(buffer_id, enabled)
+	if not buffer_id then
+		return false
+	end
+	
+	-- Store the enabled state
+	help_section_enabled = enabled
+	
+	if not enabled then
+		-- Clear help section by rendering without it
+		return true
+	end
+	
+	-- Get merged keybind data and format it
+	local keybind_data = M.get_merged_keybinds()
+	local keybind_lines = M.format_keybind_lines(keybind_data)
+	local help_content = M.build_help_section_content(keybind_lines)
+	
+	-- Get current buffer content
+	local current_lines = vim.api.nvim_buf_get_lines(buffer_id, 0, -1, false)
+	
+	-- Find existing help section and remove it
+	local log_content = {}
+	local in_help_section = false
+	
+	for _, line in ipairs(current_lines) do
+		if string.match(line, "^─+$") and not in_help_section then
+			-- Start of help section - stop adding to log content
+			in_help_section = true
+		elseif not in_help_section then
+			table.insert(log_content, line)
+		end
+	end
+	
+	-- Combine log content with new help section
+	local all_content = {}
+	for _, line in ipairs(log_content) do
+		table.insert(all_content, line)
+	end
+	for _, line in ipairs(help_content) do
+		table.insert(all_content, line)
+	end
+	
+	-- Set buffer content
+	vim.api.nvim_buf_set_option(buffer_id, "modifiable", true)
+	vim.api.nvim_buf_set_lines(buffer_id, 0, -1, false, all_content)
+	vim.api.nvim_buf_set_option(buffer_id, "modifiable", false)
+	
+	return true
+end
+
+-- Toggle help section visibility
+function M.toggle_help_section()
+	local buffer_id = M.get_log_buffer_id()
+	if not buffer_id then
+		return false
+	end
+	
+	help_section_enabled = not help_section_enabled
+	return M.render_help_section(buffer_id, help_section_enabled)
+end
+
+-- Get help section enabled state
+function M.is_help_section_enabled()
+	return help_section_enabled
 end
 
 return M
