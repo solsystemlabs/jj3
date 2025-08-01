@@ -195,7 +195,6 @@ function M.close_log()
 
 	local closed = window.close_log_window()
 	if closed then
-		show_info_message("jj log window closed")
 		return true
 	end
 

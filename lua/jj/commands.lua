@@ -232,14 +232,6 @@ M.log = {
 	end,
 }
 
--- Legacy compatibility functions (if needed)
-function M.close_log_window()
-	return log.close_log()
-end
-
-function M.refresh_log()
-	return log.refresh_log()
-end
 
 -- Test function for debugging
 function M.test_integration()

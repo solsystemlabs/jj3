@@ -19,7 +19,7 @@ function M.register_command_keybindings(buffer_id, command_name)
 		}
 	end
 
-	local command_def = command_context.get_command(command_name)
+	local command_def = command_context.get_command_definition(command_name)
 	if not command_def then
 		return {
 			success = false,
@@ -129,7 +129,7 @@ end
 -- Detect keybinding conflicts for a command
 function M.detect_keybinding_conflicts(buffer_id, command_name)
 	local conflicts = {}
-	local command_def = command_context.get_command(command_name)
+	local command_def = command_context.get_command_definition(command_name)
 
 	if not command_def then
 		return conflicts
@@ -253,7 +253,7 @@ end
 
 -- Internal function to get effective keymap (considering user overrides)
 function M._get_effective_keymap(command_name, action_type)
-	local command_def = command_context.get_command(command_name)
+	local command_def = command_context.get_command_definition(command_name)
 	local default_keymap
 
 	if action_type == "quick_action" and command_def.quick_action then
@@ -279,7 +279,7 @@ function M._execute_quick_action(command_name)
 	local bufnr = vim.api.nvim_get_current_buf()
 
 	-- Get command definition to check if it needs selection workflow
-	local command_def = command_context.get_command(command_name)
+	local command_def = command_context.get_command_definition(command_name)
 
 	if not command_def then
 		vim.notify("Command not found: " .. command_name, vim.log.levels.ERROR)
@@ -316,27 +316,26 @@ function M._execute_quick_action(command_name)
 			vim.notify(message, vim.log.levels.ERROR)
 		end
 	else
-		-- Execute immediately using the old system for commands without phases
-		local default_commands = require("jj.default_commands")
-		local context = M._get_current_cursor_context()
-		local result = default_commands.execute_with_confirmation(command_name, context)
+		-- Execute immediately for commands without phases using unified system
+		local result = selection_integration.execute_command(command_name, bufnr)
 
+		-- Provide user feedback based on result type
 		if result.success then
-			-- For interactive commands, don't show success message since terminal handles the interaction
-			-- For non-interactive commands, only refresh the log
-			if not result.interactive then
-				local commit_info = context.change_id or context.commit_id or "@"
-				local success_msg = string.format("jj %s %s executed successfully", command_name, commit_info)
+			if result.requires_selection then
+				-- Selection workflow started - user feedback handled by selection system
+				vim.notify(result.message or "Selection mode started", vim.log.levels.INFO)
+			else
+				-- Immediate command executed - show command details if available
+				local success_msg = "Command executed successfully"
+				if result.executed_command then
+					success_msg = "Successfully executed: " .. result.executed_command
+				end
 				vim.notify(success_msg, vim.log.levels.INFO)
-			end
 
-			-- Refresh the log window for non-interactive commands
-			if not result.interactive then
+				-- Refresh the log window after successful immediate command
 				local log = require("jj.log.init")
 				log.refresh_log()
 			end
-		elseif result.queued then
-			-- Command was queued - this is normal during refresh, don't show error
 		else
 			local message = "Command failed: " .. command_name
 			if result.error then

@@ -239,10 +239,6 @@ function M.get_command_definition(name)
 	return command_registry[name]
 end
 
--- Legacy compatibility: alias for get_command_definition
-function M.get_command(name)
-	return M.get_command_definition(name)
-end
 
 -- Merge user-defined commands with existing commands
 function M.merge_user_commands(user_commands)

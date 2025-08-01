@@ -6,7 +6,7 @@ local command_context = require("jj.command_context")
 
 -- Generate menu options from command definition
 function M.generate_menu_options(command_name)
-  local command_def = command_context.get_command(command_name)
+  local command_def = command_context.get_command_definition(command_name)
   
   if not command_def or not command_def.menu then
     return nil
@@ -53,7 +53,7 @@ end
 
 -- Show command menu using vim.ui.select
 function M.show_command_menu(command_name)
-  local command_def = command_context.get_command(command_name)
+  local command_def = command_context.get_command_definition(command_name)
   
   if not command_def then
     return {
