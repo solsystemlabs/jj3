@@ -504,12 +504,37 @@ end
 
 -- Handle post-interactive command completion tasks
 function M._handle_interactive_command_completion(command, exit_code)
+	local success = exit_code == 0
+	
+	-- Show normal command completion message
+	if success then
+		local cmd_name = command:match("^(%S+)") or "command"
+		local commit_info = command:match("%s+(%S+)") or ""
+		if commit_info ~= "-i" and commit_info ~= "" then
+			vim.notify(string.format("jj %s %s executed successfully", cmd_name, commit_info), vim.log.levels.INFO)
+		else
+			vim.notify(string.format("jj %s executed successfully", cmd_name), vim.log.levels.INFO)
+		end
+	else
+		local cmd_name = command:match("^(%S+)") or "command"
+		vim.notify(string.format("jj %s failed (exit code: %d)", cmd_name, exit_code), vim.log.levels.ERROR)
+	end
+	
 	-- Trigger auto-refresh hooks after interactive command completion
 	local ok, auto_refresh = pcall(require, "jj.auto_refresh")
 	if ok then
-		local success = exit_code == 0
 		local output = success and "Interactive command completed" or ("Command failed with exit code " .. exit_code)
 		auto_refresh.on_command_complete(command, success, output)
+	end
+	
+	-- Refresh the log view after successful interactive commands
+	if success then
+		vim.defer_fn(function()
+			local log_ok, log = pcall(require, "jj.log.init")
+			if log_ok then
+				log.refresh_log()
+			end
+		end, 200) -- Small delay to ensure command effects are visible
 	end
 end
 

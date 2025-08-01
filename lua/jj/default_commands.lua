@@ -221,7 +221,7 @@ local DEFAULT_COMMANDS = {
 	split = {
 		quick_action = {
 			cmd = "split",
-			args = { "{change_id}" },
+			args = { "-r", "{change_id}", "-i" },
 			keymap = "x",
 			description = "Split commit interactively",
 		},

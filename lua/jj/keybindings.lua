@@ -322,14 +322,21 @@ function M._execute_quick_action(command_name)
 		local result = default_commands.execute_with_confirmation(command_name, context)
 
 		if result.success then
-			-- Show specific command that was executed
-			local commit_info = context.change_id or context.commit_id or "@"
-			local success_msg = string.format("jj %s %s executed successfully", command_name, commit_info)
-			vim.notify(success_msg, vim.log.levels.INFO)
+			-- For interactive commands, don't show success message since terminal handles the interaction
+			-- For non-interactive commands, only refresh the log
+			if not result.interactive then
+				local commit_info = context.change_id or context.commit_id or "@"
+				local success_msg = string.format("jj %s %s executed successfully", command_name, commit_info)
+				vim.notify(success_msg, vim.log.levels.INFO)
+			end
 
-			-- Refresh the log window
-			local log = require("jj.log.init")
-			log.refresh_log()
+			-- Refresh the log window for non-interactive commands
+			if not result.interactive then
+				local log = require("jj.log.init")
+				log.refresh_log()
+			end
+		elseif result.queued then
+			-- Command was queued - this is normal during refresh, don't show error
 		else
 			local message = "Command failed: " .. command_name
 			if result.error then

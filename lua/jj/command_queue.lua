@@ -33,8 +33,6 @@ function M.queue_command(command, callback)
 
 	table.insert(queue_state.commands, queued_command)
 
-	-- Provide user feedback
-	vim.notify("jj.nvim: Command queued during refresh: " .. command, vim.log.levels.INFO)
 
 	return true
 end
@@ -51,7 +49,6 @@ function M.process_queue()
 	end
 
 	local queue_size = #queue_state.commands
-	vim.notify("jj.nvim: Processing " .. queue_size .. " queued command(s)", vim.log.levels.INFO)
 
 	local successful_count = 0
 	local failed_count = 0
@@ -59,7 +56,6 @@ function M.process_queue()
 	-- Process commands in FIFO order
 	for _, queued_command in ipairs(queue_state.commands) do
 		local success, error_msg = pcall(function()
-			vim.notify("jj.nvim: Executing queued command: " .. queued_command.command, vim.log.levels.INFO)
 			queued_command.callback()
 		end)
 
@@ -88,14 +84,12 @@ function M.process_queue()
 	-- Clear the queue
 	queue_state.commands = {}
 
-	-- Provide summary feedback
+	-- Only show errors if commands failed
 	if failed_count > 0 then
 		vim.notify(
-			"jj.nvim: Queue processed: " .. successful_count .. " succeeded, " .. failed_count .. " failed",
-			vim.log.levels.WARN
+			"jj.nvim: " .. failed_count .. " queued command(s) failed",
+			vim.log.levels.ERROR
 		)
-	else
-		vim.notify("jj.nvim: All " .. successful_count .. " queued commands executed successfully", vim.log.levels.INFO)
 	end
 
 	return failed_count == 0

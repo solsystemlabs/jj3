@@ -40,6 +40,9 @@ function M.create_terminal_window(command, config, on_exit_callback)
     }
   end
   
+  -- Configure buffer for terminal use
+  vim.bo[buffer_id].buflisted = false
+  
   -- Configure floating window
   local win_config = {
     relative = "editor",
@@ -67,6 +70,18 @@ function M.create_terminal_window(command, config, on_exit_callback)
     -- Clean up window and buffer on job creation failure
     pcall(vim.api.nvim_win_close, window_id, true)
     return job_result
+  end
+  
+  -- Set up terminal keybindings for easier exit
+  vim.api.nvim_buf_set_keymap(buffer_id, "t", "<C-c>", "<C-\\><C-n>:q<CR>", {
+    silent = true,
+    noremap = true,
+    desc = "Close terminal window"
+  })
+  
+  -- Enter terminal mode if window has focus
+  if window_config.focus then
+    vim.cmd("startinsert")
   end
   
   -- Track active terminal
@@ -141,20 +156,29 @@ end
 
 -- Start terminal job in the given buffer
 function M.start_terminal_job(buffer_id, window_id, command, on_exit_callback)
-  -- Prepare full command
+  -- Prepare full command  
   local full_command = "jj " .. command
   
   -- Set up job options
   local job_opts = {
     pty = true,
     on_exit = function(job_id, exit_code, event)
+      -- Capture terminal output for completion message
+      local output_lines = vim.api.nvim_buf_get_lines(buffer_id, 0, -1, false)
+      local output = table.concat(output_lines, "\n"):gsub("^%s*", ""):gsub("%s*$", "")
+      
       -- Clean up terminal tracking
       if active_terminals[window_id] then
         active_terminals[window_id] = nil
       end
       
-      -- Close the window
-      pcall(vim.api.nvim_win_close, window_id, true)
+      -- Terminal completion will be handled by the normal command flow
+      -- via the on_exit_callback
+      
+      -- Close the window after a brief delay
+      vim.defer_fn(function()
+        pcall(vim.api.nvim_win_close, window_id, true)
+      end, 100)
       
       -- Call user callback if provided
       if on_exit_callback and type(on_exit_callback) == "function" then

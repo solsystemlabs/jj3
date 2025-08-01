@@ -63,7 +63,10 @@ local function get_colored_log_output()
 	local log_result = executor.execute_jj_command("log --color=always")
 
 	if not log_result.success then
-		if log_result.error and log_result.error:match("command not found") then
+		if log_result.queued then
+			-- Command was queued during refresh - this is normal, just return nil to skip refresh
+			return nil, "refresh_queued"
+		elseif log_result.error and log_result.error:match("command not found") then
 			return nil, "jj_not_found"
 		else
 			return nil, "jj_execution_failed", log_result.error
@@ -158,6 +161,10 @@ function M.refresh_log()
 	-- Get fresh colored log output
 	local colored_output, error_type, error_details = get_colored_log_output()
 	if not colored_output then
+		if error_type == "refresh_queued" then
+			-- Refresh was queued during active refresh - this is normal, return success
+			return true
+		end
 		show_error_message(error_type, error_details)
 		return false
 	end

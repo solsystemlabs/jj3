@@ -173,8 +173,6 @@ function M.auto_refresh_after_command(command, success, output, window_mock)
 		command_queue.on_refresh_start()
 	end
 
-	-- Provide user feedback
-	vim.notify("jj.nvim: Auto-refreshing after " .. command, vim.log.levels.INFO)
 
 	-- Get current cursor position to preserve it
 	local current_window = vim.api.nvim_get_current_win()
@@ -232,7 +230,6 @@ function M.auto_refresh_after_command(command, success, output, window_mock)
 			pcall(vim.api.nvim_win_set_cursor, current_window, cursor_pos)
 		end
 
-		vim.notify("jj.nvim: Auto-refresh completed", vim.log.levels.INFO)
 		return true
 	else
 		vim.notify("jj.nvim: Auto-refresh failed", vim.log.levels.ERROR)
