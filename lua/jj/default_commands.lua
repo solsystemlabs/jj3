@@ -218,6 +218,15 @@ local DEFAULT_COMMANDS = {
 			},
 		},
 	},
+
+	split = {
+		quick_action = {
+			cmd = "split",
+			args = { "{change_id}" },
+			keymap = "x",
+			description = "Split commit interactively",
+		},
+	},
 }
 
 -- Get command definition by name

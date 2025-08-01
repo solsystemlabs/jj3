@@ -108,8 +108,17 @@ end
 
 -- Register all default keybindings for jj log buffer
 function M.register_all_default_keybindings(buffer_id)
-	local default_commands = { "new", "rebase", "abandon", "edit", "squash", "describe_current", "status" }
-	return M.register_all_command_keybindings(buffer_id, default_commands)
+	-- Auto-discover all commands from default_commands module
+	local default_commands_module = require("jj.default_commands")
+	local all_default_commands = default_commands_module.get_all_default_commands()
+	
+	-- Extract command names from the table
+	local command_names = {}
+	for command_name, _ in pairs(all_default_commands) do
+		table.insert(command_names, command_name)
+	end
+	
+	return M.register_all_command_keybindings(buffer_id, command_names)
 end
 
 -- Setup keybindings for jj buffer (integration point)
