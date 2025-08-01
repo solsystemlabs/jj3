@@ -187,7 +187,6 @@ local DEFAULT_COMMANDS = {
 		},
 	},
 
-	-- Immediate commands (no selection needed)
 	describe_current = {
 		quick_action = {
 			cmd = "describe",

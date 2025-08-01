@@ -47,7 +47,12 @@ function M._execute_immediate_command(command_def, bufnr)
 	
 	local command_parts = { quick_action.cmd }
 	for _, arg in ipairs(substituted_args) do
-		table.insert(command_parts, arg)
+		-- Quote arguments that contain spaces or are empty strings
+		if arg == "" or string.match(arg, "%s") then
+			table.insert(command_parts, '"' .. arg .. '"')
+		else
+			table.insert(command_parts, arg)
+		end
 	end
 	local full_command = table.concat(command_parts, " ")
 
@@ -212,7 +217,14 @@ function M._build_command_string(command_def, selections, context)
 
 	-- Build final command
 	local command_parts = { quick_action.cmd }
-	vim.list_extend(command_parts, final_args)
+	for _, arg in ipairs(final_args) do
+		-- Quote arguments that contain spaces or are empty strings
+		if arg == "" or string.match(arg, "%s") then
+			table.insert(command_parts, '"' .. arg .. '"')
+		else
+			table.insert(command_parts, arg)
+		end
+	end
 
 	return true, table.concat(command_parts, " ")
 end

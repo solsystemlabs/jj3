@@ -147,10 +147,8 @@ function M.substitute_final_placeholders(args, context)
 			end
 		elseif arg == "{user_input}" then
 			local input = vim.fn.input("Enter value: ")
-			if input ~= "" then
-				table.insert(substituted, input)
-			end
-			-- Skip empty input - don't add to substituted args
+			table.insert(substituted, input)
+			-- Always include user input, even if empty
 		else
 			table.insert(substituted, arg)
 		end
