@@ -14,12 +14,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.4 Implement dynamic content area resizing
   - [x] 1.5 Verify all tests pass
 
-- [ ] 2. Integrate merged keybind data access
-  - [ ] 2.1 Write tests for keybind data retrieval
-  - [ ] 2.2 Create function to access current merged keybind configuration
-  - [ ] 2.3 Format keybind data for display (key: description)
-  - [ ] 2.4 Handle empty or missing keybind configuration
-  - [ ] 2.5 Verify all tests pass
+- [x] 2. Integrate merged keybind data access
+  - [x] 2.1 Write tests for keybind data retrieval
+  - [x] 2.2 Create function to access current merged keybind configuration
+  - [x] 2.3 Format keybind data for display (key: description)
+  - [x] 2.4 Handle empty or missing keybind configuration
+  - [x] 2.5 Verify all tests pass
 
 - [ ] 3. Add help section toggle functionality
   - [ ] 3.1 Write tests for toggle behavior

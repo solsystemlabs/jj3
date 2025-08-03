@@ -652,36 +652,84 @@ function M.cleanup_cursor_line_highlighting(buffer_id)
 end
 
 -- Get merged keybind data from the keybinding system
-function M.get_merged_keybinds()
-	local buffer_id = M.get_log_buffer_id()
-	
-	if not buffer_id then
-		return {}
+function M.get_merged_keybinds(skip_buffer_check)
+	-- Only check buffer if not explicitly skipping (for testing)
+	if not skip_buffer_check then
+		local buffer_id = M.get_log_buffer_id()
+		if not buffer_id then
+			return {}
+		end
 	end
 	
-	-- Get merged keybinds from command definitions (since registry is internal)
+	-- Get merged keybinds from command definitions with proper user override handling
 	local default_commands = require("jj.default_commands")
 	local command_context = require("jj.command_context")
+	local keybindings = require("jj.keybindings")
 	local all_commands = default_commands.get_all_default_commands()
 	local merged_keybinds = {}
+	
+	-- Ensure we have command data
+	if not all_commands or vim.tbl_isempty(all_commands) then
+		return {}
+	end
 	
 	for command_name, command_def in pairs(all_commands) do
 		-- Get the command definition through command_context to get merged version
 		local merged_def = command_context.get_command_definition(command_name)
 		
-		if merged_def and merged_def.quick_action and merged_def.quick_action.keymap then
-			merged_keybinds[merged_def.quick_action.keymap] = {
-				command = command_name,
-				action_type = "quick_action",
-				description = merged_def.quick_action.description,
-			}
+		-- Fallback to original definition if command_context doesn't have it
+		if not merged_def then
+			merged_def = command_def
 		end
-		if merged_def and merged_def.menu and merged_def.menu.keymap then
-			merged_keybinds[merged_def.menu.keymap] = {
-				command = command_name,
-				action_type = "menu", 
-				description = merged_def.menu.title or (command_name .. " Options"),
-			}
+		
+		-- Handle quick action with user overrides
+		if merged_def and merged_def.quick_action then
+			-- Try to get effective keymap that considers user overrides
+			local effective_keymap = nil
+			if keybindings._get_effective_keymap then
+				local success, keymap = pcall(keybindings._get_effective_keymap, command_name, "quick_action")
+				if success and keymap then
+					effective_keymap = keymap
+				end
+			end
+			
+			-- Fallback to definition keymap if no effective keymap found
+			if not effective_keymap then
+				effective_keymap = merged_def.quick_action.keymap
+			end
+			
+			if effective_keymap then
+				merged_keybinds[effective_keymap] = {
+					command = command_name,
+					action_type = "quick_action",
+					description = merged_def.quick_action.description,
+				}
+			end
+		end
+		
+		-- Handle menu with user overrides
+		if merged_def and merged_def.menu then
+			-- Try to get effective keymap that considers user overrides
+			local effective_keymap = nil
+			if keybindings._get_effective_keymap then
+				local success, keymap = pcall(keybindings._get_effective_keymap, command_name, "menu")
+				if success and keymap then
+					effective_keymap = keymap
+				end
+			end
+			
+			-- Fallback to definition keymap if no effective keymap found
+			if not effective_keymap then
+				effective_keymap = merged_def.menu.keymap
+			end
+			
+			if effective_keymap then
+				merged_keybinds[effective_keymap] = {
+					command = command_name,
+					action_type = "menu", 
+					description = merged_def.menu.title or (command_name .. " Options"),
+				}
+			end
 		end
 	end
 	
