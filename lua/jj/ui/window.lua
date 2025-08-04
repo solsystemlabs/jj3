@@ -270,6 +270,9 @@ function M.open_log_window(user_config)
 	-- Configure cursor line highlighting specifically for jj buffers
 	M.setup_cursor_line_highlighting(window_id, buffer_id)
 
+	-- Setup cursor constraints to prevent navigation into help section
+	M.setup_cursor_constraints(buffer_id, window_id)
+
 	-- Store window ID
 	log_window_id = window_id
 
@@ -289,6 +292,8 @@ function M.close_log_window()
 			navigation_integration.cleanup_navigation_for_buffer(log_buffer_id)
 			-- Clean up cursor line highlighting
 			M.cleanup_cursor_line_highlighting(log_buffer_id)
+			-- Clean up cursor constraints
+			M.cleanup_cursor_constraints(log_buffer_id)
 		end
 
 		-- Reset refresh state when window is closed
@@ -537,6 +542,8 @@ function M.cleanup()
 	-- Clean up navigation for any active buffers
 	if log_buffer_id then
 		navigation_integration.cleanup_navigation_for_buffer(log_buffer_id)
+		-- Clean up cursor constraints
+		M.cleanup_cursor_constraints(log_buffer_id)
 	end
 
 	-- Reset refresh state on cleanup
@@ -646,6 +653,100 @@ function M.cleanup_cursor_line_highlighting(buffer_id)
 	M.clear_full_width_highlighting(buffer_id)
 
 	return true
+end
+
+-- Find the line where help section starts (separator line)
+function M.find_help_section_start(buffer_id)
+	if not buffer_id then
+		return nil
+	end
+	
+	local lines = vim.api.nvim_buf_get_lines(buffer_id, 0, -1, false)
+	for i, line in ipairs(lines) do
+		-- Check for line consisting entirely of dash characters (Unicode or ASCII)
+		if string.match(line, "^[─-]+$") and #line > 10 then
+			return i -- Return 1-indexed line number
+		end
+	end
+	return nil
+end
+
+-- Get the last line of log content (0-indexed)
+function M.get_log_content_end(buffer_id)
+	if not buffer_id then
+		return 0
+	end
+	
+	local lines = vim.api.nvim_buf_get_lines(buffer_id, 0, -1, false)
+	for i, line in ipairs(lines) do
+		-- Use same logic as find_help_section_start
+		if string.match(line, "^[─-]+$") and #line > 10 then
+			return i - 1 -- Return line before separator (0-indexed)
+		end
+	end
+	return #lines - 1 -- If no separator, return last line (0-indexed)
+end
+
+-- Constrain cursor to log area only
+function M.constrain_cursor_to_log_area(buffer_id, window_id)
+	if not buffer_id or not window_id then
+		return false
+	end
+	
+	local cursor_pos = vim.api.nvim_win_get_cursor(window_id)
+	local line = cursor_pos[1] -- 1-indexed
+	local col = cursor_pos[2]   -- 0-indexed
+	
+	local log_end_line = M.get_log_content_end(buffer_id) + 1 -- Convert to 1-indexed
+	
+	if line > log_end_line then
+		-- Cursor is in help section, move it to last log line
+		vim.api.nvim_win_set_cursor(window_id, {log_end_line, col})
+		return true -- Cursor was constrained
+	end
+	
+	return false -- Cursor was already in valid area
+end
+
+-- Setup cursor constraints for log buffer
+function M.setup_cursor_constraints(buffer_id, window_id)
+	if not buffer_id or not window_id then
+		return false
+	end
+	
+	-- Create autocmd group for cursor constraints
+	local autocmd_group = vim.api.nvim_create_augroup("JJCursorConstraints", { clear = false })
+	
+	-- Set up cursor movement constraints
+	vim.api.nvim_create_autocmd({"CursorMoved", "CursorMovedI"}, {
+		group = autocmd_group,
+		buffer = buffer_id,
+		callback = function()
+			-- Only apply constraints if this is the active window
+			local current_window = vim.api.nvim_get_current_win()
+			if current_window == window_id then
+				M.constrain_cursor_to_log_area(buffer_id, window_id)
+			end
+		end
+	})
+	
+	return true
+end
+
+-- Clean up cursor constraints
+function M.cleanup_cursor_constraints(buffer_id)
+	if not buffer_id then
+		return false
+	end
+	
+	local ok, _ = pcall(function()
+		vim.api.nvim_clear_autocmds({
+			group = "JJCursorConstraints",
+			buffer = buffer_id
+		})
+	end)
+	
+	return ok
 end
 
 -- Get merged keybind data from the keybinding system

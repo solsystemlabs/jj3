@@ -28,9 +28,9 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.4 Persist toggle state across sessions (SKIPPED)
   - [x] 3.5 Verify all tests pass (SKIPPED)
 
-- [ ] 4. Update log window integration
-  - [ ] 4.1 Write tests for window management integration
-  - [ ] 4.2 Modify log window refresh to include help section
-  - [ ] 4.3 Ensure cursor position handling during toggles
-  - [ ] 4.4 Test scrolling behavior with help section
-  - [ ] 4.5 Verify all tests pass
+- [x] 4. Update log window integration
+  - [x] 4.1 Write tests for window management integration
+  - [x] 4.2 Modify log window refresh to include help section
+  - [x] 4.3 Ensure cursor position handling during toggles
+  - [x] 4.4 Test scrolling behavior with help section
+  - [x] 4.5 Verify all tests pass

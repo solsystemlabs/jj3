@@ -86,7 +86,7 @@
 - [ ] Commit details popup - Show detailed commit info on demand `M`
 - [ ] Command palette/menu - Searchable interface for all available commands `L`
 - [ ] Status indicators - Visual cues for conflict states, working copy, etc. `M`
-- [ ] Keybinding help system - Display current keybindings and allow customization `M`
+- [x] Keybinding help system - Display current keybindings and allow customization `M`
 
 ### Should-Have Features
 
