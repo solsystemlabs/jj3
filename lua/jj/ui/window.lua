@@ -28,7 +28,6 @@ local current_config = vim.deepcopy(DEFAULT_CONFIG)
 -- Window and buffer state
 local log_buffer_id = nil
 local log_window_id = nil
-local help_section_enabled = false
 
 -- Setup buffer with proper options including text wrapping (alias for create_log_buffer)
 function M.setup_buffer()
@@ -463,10 +462,8 @@ function M.render_log_content(raw_colored_output, commits)
 		navigation_integration.setup_navigation_integration(buffer_id, commits, true)
 	end
 
-	-- Render help section if enabled
-	if help_section_enabled then
-		M.render_help_section(buffer_id, true)
-	end
+	-- Always render help section
+	M.render_help_section(buffer_id)
 
 	return result ~= nil
 end
@@ -779,18 +776,10 @@ function M.build_help_section_content(keybind_lines)
 	return content
 end
 
--- Render help section to buffer
-function M.render_help_section(buffer_id, enabled)
+-- Render help section to buffer (always visible)
+function M.render_help_section(buffer_id)
 	if not buffer_id then
 		return false
-	end
-	
-	-- Store the enabled state
-	help_section_enabled = enabled
-	
-	if not enabled then
-		-- Clear help section by rendering without it
-		return true
 	end
 	
 	-- Get merged keybind data and format it
@@ -831,20 +820,5 @@ function M.render_help_section(buffer_id, enabled)
 	return true
 end
 
--- Toggle help section visibility
-function M.toggle_help_section()
-	local buffer_id = M.get_log_buffer_id()
-	if not buffer_id then
-		return false
-	end
-	
-	help_section_enabled = not help_section_enabled
-	return M.render_help_section(buffer_id, help_section_enabled)
-end
-
--- Get help section enabled state
-function M.is_help_section_enabled()
-	return help_section_enabled
-end
 
 return M

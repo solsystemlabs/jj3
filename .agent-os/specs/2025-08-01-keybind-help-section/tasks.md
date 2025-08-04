@@ -21,12 +21,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.4 Handle empty or missing keybind configuration
   - [x] 2.5 Verify all tests pass
 
-- [ ] 3. Add help section toggle functionality
-  - [ ] 3.1 Write tests for toggle behavior
-  - [ ] 3.2 Implement toggle keybind and state management
-  - [ ] 3.3 Add configuration option for default visibility
-  - [ ] 3.4 Persist toggle state across sessions
-  - [ ] 3.5 Verify all tests pass
+- [x] 3. Add help section toggle functionality (SKIPPED - help section should be persistent)
+  - [x] 3.1 Write tests for toggle behavior (SKIPPED)
+  - [x] 3.2 Implement toggle keybind and state management (SKIPPED)
+  - [x] 3.3 Add configuration option for default visibility (SKIPPED)
+  - [x] 3.4 Persist toggle state across sessions (SKIPPED)
+  - [x] 3.5 Verify all tests pass (SKIPPED)
 
 - [ ] 4. Update log window integration
   - [ ] 4.1 Write tests for window management integration

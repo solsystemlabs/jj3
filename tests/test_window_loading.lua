@@ -55,7 +55,6 @@ assert(type(window.get_merged_keybinds) == "function", "get_merged_keybinds shou
 assert(type(window.format_keybind_lines) == "function", "format_keybind_lines should be a function")
 assert(type(window.build_help_section_content) == "function", "build_help_section_content should be a function")
 assert(type(window.render_help_section) == "function", "render_help_section should be a function")
-assert(type(window.toggle_help_section) == "function", "toggle_help_section should be a function")
 print("  PASSED: All help section functions exist")
 
 print("Test 3: Get merged keybinds works")
